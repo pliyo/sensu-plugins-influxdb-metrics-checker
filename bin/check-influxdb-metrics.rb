@@ -56,38 +56,34 @@ class CheckStormCapacity < Sensu::Plugin::Check::CLI
   option :db,
          short: '-d',
          long: '--db=VALUE',
-         description: 'Default DB',
-         proc: proc { |l| l.to_f },
+         description: 'Default DB'
 
   option :query,
          short: '-q',
          long: '--query=VALUE',
-         description: 'Query to influx DB. Ex: select * from metrics',
-         proc: proc { |l| l.to_f },
+         description: 'Query to influx DB. Ex: select * from metrics'
 
   def request(path)
     protocol = config[:ssl] ? 'https' : 'http'
     auth = Base64.encode64("#{config[:user]}:#{config[:pass]}")
+    url = "#{protocol}://#{config[:host]}:#{config[:port]}/query?#{path}"
+    puts url
     RestClient::Request.execute(
       method: :get,
-      url: "#{protocol}://#{config[:host]}:#{config[:port]}/query?db=#{path}",
+      url: url,
       timeout: config[:timeout],
       headers: { 'Authorization' => "Basic #{auth}" }
     )
   end
 
   def run
-    query = "#{db}&q=#{query}"
-    r = request(query)
+    query = "#{config[:db]}&q=#{config[:query]}"
 
-    if r.code != 200
-      critical "unexpected status code '#{r.code}'"
-    end
+    puts "Running..."
+    r = request(query)
 
     # TODO: coming next: Parse response to json
     #metrics = JSON.parse(r.to_str)['XX']
-
-    end
 
   rescue Errno::ECONNREFUSED => e
     critical 'InfluxDB is not responding' + e.message
