@@ -16,6 +16,12 @@ class CheckStormCapacity < Sensu::Plugin::Check::CLI
          description: 'Cluster host',
          required: true
 
+  option :port,
+          short: '-p',
+          long: '--port=VALUE',
+          description: 'Api port',
+          required: true
+
   option :user,
          short: '-u',
          long: '--username=VALUE',
@@ -64,9 +70,9 @@ class CheckStormCapacity < Sensu::Plugin::Check::CLI
          description: 'Query to influx DB. Ex: select * from metrics'
 
   def request(path)
-    protocol = config[:ssl] ? 'https' : 'http'
+    protocol = 'http'
     auth = Base64.encode64("#{config[:user]}:#{config[:pass]}")
-    url = "#{protocol}://#{config[:host]}:#{config[:port]}/query?#{path}"
+    url = "#{protocol}://#{config[:host]}:#{config[:port]}/query?db=#{path}"
     puts url
     RestClient::Request.execute(
       method: :get,
@@ -81,6 +87,8 @@ class CheckStormCapacity < Sensu::Plugin::Check::CLI
 
     puts "Running..."
     r = request(query)
+
+    puts r
 
     # TODO: coming next: Parse response to json
     #metrics = JSON.parse(r.to_str)['XX']
