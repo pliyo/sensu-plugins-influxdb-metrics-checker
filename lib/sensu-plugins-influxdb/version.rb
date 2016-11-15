@@ -1,4 +1,4 @@
-module SensuPluginInfluxDb
+module SensuPluginsInfluxDb
   module Version
     MAJOR = 0
     MINOR = 1
