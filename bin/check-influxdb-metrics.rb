@@ -94,10 +94,19 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
     r = request(query)
 
-    # TODO: coming next: Parse response to json
-    metrics = JSON.parse(r.to_str)
+    metrics = JSON.parse(r.to_str)['results']
 
-    puts metrics
+    metrics.each do |metrics|
+      series = metrics.fetch("series")
+      puts series
+
+      values = series['values'][0][1]
+
+      # Working on: CheckInfluxDbMetrics UNKNOWN: An exception occurred:no implicit conversion of String into Integer
+      puts values
+
+      #seriess = JSON.parse(series.to_str)['series']
+      end
 
   rescue Errno::ECONNREFUSED => e
     critical 'InfluxDB is not responding' + e.message
