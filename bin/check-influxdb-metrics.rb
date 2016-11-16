@@ -107,24 +107,14 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
       values = 0
     end
 
-    return values
+    return values.to_f
   end
 
   def getPercentage(original, newnumber)
     decrease = original - newnumber
     decreasedPercentage = ( decrease.to_f / original.to_f ) * 100
   end
-
-  def evaluateDifference(difference)
-    if difference < config[:crit]
-      critical "\"#{config[:metric]}\" sum is below allowed minimum of #{config[:crit]} %"
-    elsif difference < config[:warn]
-      warning "\"#{config[:metric]}\" sum is below warn threshold of #{config[:warn]}"
-    else
-      ok "metrics count ok"
-    end
-  end
-
+  
   def request(path)
     protocol = 'http'
     auth = Base64.encode64("#{config[:user]}:#{config[:pass]}")
@@ -154,7 +144,13 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     difference = getPercentage(todayValue, yesterdayValue)
     puts difference
 
-    evaluateDifference(difference)
+    if difference < config[:crit]
+      critical "\"#{config[:metric]}\" sum is below allowed minimum of #{config[:crit]} %"
+    elsif difference < config[:warn]
+      warning "\"#{config[:metric]}\" sum is below warn threshold of #{config[:warn]}"
+    else
+      ok "metrics count ok"
+    end
 
   rescue Errno::ECONNREFUSED => e
     critical 'InfluxDB is not responding' + e.message
