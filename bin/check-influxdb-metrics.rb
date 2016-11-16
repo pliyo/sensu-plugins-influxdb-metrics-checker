@@ -70,6 +70,18 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          long: '--metric=VALUE',
          description: 'Metric to influx DB. Ex datareceivers.messages.count'
 
+  def readMetrics(response)
+    metrics = JSON.parse(response.to_str)['results']
+    series = metrics[0]['series']
+    values = series[0]['values'][0][1]
+
+    if values == nil then
+      puts "Values is null (nil for Ruby developers)"
+    end
+
+    return values
+  end
+
   def request(path)
     protocol = 'http'
     auth = Base64.encode64("#{config[:user]}:#{config[:pass]}")
@@ -85,25 +97,19 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   def run
 
     metric = "\"#{config[:metric]}\""
-    query = "SELECT sum(\"value\") from " + metric + " WHERE time > now() - 1h"
+    query = "SELECT sum(\"value\") from " + metric + " WHERE time > now() - 24h"
 
     encodedparams = Addressable::URI.escape(query)
 
     query = "#{config[:db]}&q=" + encodedparams
 
     r = request(query)
+    v = readMetrics(r)
 
-    metrics = JSON.parse(r.to_str)['results']
+    puts v
+    #secondQuery = "SELECT sum(\"value\") from " + metric + " WHERE time > now() - 10m"
+    #secondR = request(secondQuery)
 
-    puts metrics
-    series = metrics[0]['series']
-    values = series[0]['values'][0][1]
-
-    if values == nil then puts "Values is null (nil for Ruby developers)"
-    else
-    puts values
-
-  end
 
   rescue Errno::ECONNREFUSED => e
     critical 'InfluxDB is not responding' + e.message
