@@ -65,11 +65,6 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          long: '--db=VALUE',
          description: 'Default DB'
 
-  option :where,
-         short: '-q',
-         long: '--query=VALUE',
-         description: 'Query to influx DB. Ex: select * from metrics'
-
   option :metric,
          short: '-m',
          long: '--metric=VALUE',
@@ -90,21 +85,14 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def run
 
-    metricName = "\"#{config[:metric]}\""
+    metric = "\"#{config[:metric]}\""
+    query = "SELECT sum(\"value\") from " + metric + " WHERE time > now() - 24h"
 
-    puts metricName
+    encodedparams =  Addressable::URI.escape(query)
 
-    query = "select * from " + metricName + " #{config[:where]}"
-    # Tried URI.escape before. Didn't work
-    params =  Addressable::URI.escape(query)
-
-    query = "#{config[:db]}&q=" + params
-
-    puts query
+    query = "#{config[:db]}&q=" + encodedparams
 
     r = request(query)
-
-    puts r
 
     # TODO: coming next: Parse response to json
     metrics = JSON.parse(r.to_str)
