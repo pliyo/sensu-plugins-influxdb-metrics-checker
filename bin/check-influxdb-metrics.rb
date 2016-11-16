@@ -8,6 +8,7 @@ require 'openssl'
 require 'uri'
 require 'json'
 require 'base64'
+require 'addressable/uri'
 
 class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   option :host,
@@ -64,10 +65,15 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          long: '--db=VALUE',
          description: 'Default DB'
 
-  option :query,
+  option :where,
          short: '-q',
          long: '--query=VALUE',
          description: 'Query to influx DB. Ex: select * from metrics'
+
+  option :metric,
+         short: '-m',
+         long: '--metric=VALUE',
+         description: 'Metric to influx DB. Ex datareceivers.messages.count'
 
   def request(path)
     protocol = 'http'
@@ -83,19 +89,27 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def run
-    parametersEncoded = "#{CGI::escape}(#{config[:query]}}"
 
-    puts parametersEncoded
+    metricName = "\"#{config[:metric]}\""
 
-    query = "#{config[:db]}&q=parametersEncoded"
+    puts metricName
 
-    puts "Running..."
+    query = "select * from " + metricName + " #{config[:where]}"
+    # Tried URI.escape before. Didn't work
+    params =  Addressable::URI.escape(query)
+
+    query = "#{config[:db]}&q=" + params
+
+    puts query
+
     r = request(query)
 
     puts r
 
     # TODO: coming next: Parse response to json
-    #metrics = JSON.parse(r.to_str)['XX']
+    metrics = JSON.parse(r.to_str)
+
+    puts metrics
 
   rescue Errno::ECONNREFUSED => e
     critical 'InfluxDB is not responding' + e.message
