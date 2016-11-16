@@ -9,7 +9,7 @@ require 'uri'
 require 'json'
 require 'base64'
 
-class CheckStormCapacity < Sensu::Plugin::Check::CLI
+class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   option :host,
          short: '-h',
          long: '--host=VALUE',
@@ -83,7 +83,11 @@ class CheckStormCapacity < Sensu::Plugin::Check::CLI
   end
 
   def run
-    query = "#{config[:db]}&q=#{config[:query]}"
+    parametersEncoded = "#{CGI::escape}(#{config[:query]}}"
+
+    puts parametersEncoded
+
+    query = "#{config[:db]}&q=parametersEncoded"
 
     puts "Running..."
     r = request(query)
