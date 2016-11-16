@@ -88,25 +88,17 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     metric = "\"#{config[:metric]}\""
     query = "SELECT sum(\"value\") from " + metric + " WHERE time > now() - 24h"
 
-    encodedparams =  Addressable::URI.escape(query)
+    encodedparams = Addressable::URI.escape(query)
 
     query = "#{config[:db]}&q=" + encodedparams
 
     r = request(query)
 
     metrics = JSON.parse(r.to_str)['results']
+    series = metrics[0]['series']
+    values = series[0]['values'][0][1]
 
-    metrics.each do |metrics|
-      series = metrics.fetch("series")
-      puts series
-
-      values = series['values'][0][1]
-
-      # Working on: CheckInfluxDbMetrics UNKNOWN: An exception occurred:no implicit conversion of String into Integer
-      puts values
-
-      #seriess = JSON.parse(series.to_str)['series']
-      end
+    puts values
 
   rescue Errno::ECONNREFUSED => e
     critical 'InfluxDB is not responding' + e.message
