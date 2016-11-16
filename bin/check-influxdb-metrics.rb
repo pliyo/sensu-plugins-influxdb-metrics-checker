@@ -70,6 +70,14 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          long: '--metric=VALUE',
          description: 'Metric to influx DB. Ex datareceivers.messages.count'
 
+  def buildQuery(timespan)
+    metric = "\"#{config[:metric]}\""
+    query = "SELECT sum(\"value\") from " + metric + " WHERE time > now()" + timespan
+    encodedparams = Addressable::URI.escape(query)
+    query = "#{config[:db]}&q=" + encodedparams
+    return query
+  end
+
   def readMetrics(response)
     metrics = JSON.parse(response.to_str)['results']
     series = metrics[0]['series']
@@ -96,12 +104,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def run
 
-    metric = "\"#{config[:metric]}\""
-    query = "SELECT sum(\"value\") from " + metric + " WHERE time > now() - 24h"
-
-    encodedparams = Addressable::URI.escape(query)
-
-    query = "#{config[:db]}&q=" + encodedparams
+    query = buildQuery("- 24h")
 
     r = request(query)
     v = readMetrics(r)
