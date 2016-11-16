@@ -70,12 +70,34 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          long: '--metric=VALUE',
          description: 'Metric to influx DB. Ex datareceivers.messages.count'
 
-  def buildQuery(timespan)
-    metric = "\"#{config[:metric]}\""
-    query = "SELECT sum(\"value\") from " + metric + " WHERE time > now()" + timespan
-    encodedparams = Addressable::URI.escape(query)
+  def encodeParameters(parameters)
+    encodedparams = Addressable::URI.escape(parameters)
     query = "#{config[:db]}&q=" + encodedparams
     return query
+  end
+
+  def getYesterdayQuery()
+    metric = "\"#{config[:metric]}\""
+    query = "SELECT sum(\"value\") from " + metric + " WHERE time > now() - 48h AND time < now() - 24h"
+    return query
+  end
+
+  def getTodayQuery()
+    metric = "\"#{config[:metric]}\""
+    query = "SELECT sum(\"value\") from " + metric + " WHERE time > now() - 24h"
+    return query
+  end
+
+  def yesterdayQueryEncoded()
+    query = getYesterdayQuery()
+    queryEncoded = encodeParameters(query)
+    return queryEncoded
+  end
+
+  def todayQueryEncoded()
+    query = getTodayQuery()
+    queryEncoded = encodeParameters(query)
+    return queryEncoded
   end
 
   def readMetrics(response)
@@ -84,7 +106,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     values = series[0]['values'][0][1]
 
     if values == nil then
-      puts "Values is null (nil for Ruby developers)"
+      values = 0
     end
 
     return values
@@ -103,16 +125,17 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def run
+    query = yesterdayQueryEncoded()
+    response = request(query)
+    value = readMetrics(response)
+    puts "Yesterday's Data"
+    puts value
 
-    query = buildQuery("- 24h")
-
-    r = request(query)
-    v = readMetrics(r)
-
-    puts v
-    #secondQuery = "SELECT sum(\"value\") from " + metric + " WHERE time > now() - 10m"
-    #secondR = request(secondQuery)
-
+    secondQuery = todayQueryEncoded()
+    responseToCompare = request(secondQuery)
+    valueToCompare = readMetrics(responseToCompare)
+    puts "Today's data"
+    puts valueToCompare
 
   rescue Errno::ECONNREFUSED => e
     critical 'InfluxDB is not responding' + e.message
