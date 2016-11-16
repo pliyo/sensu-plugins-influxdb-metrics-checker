@@ -74,7 +74,6 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     protocol = 'http'
     auth = Base64.encode64("#{config[:user]}:#{config[:pass]}")
     url = "#{protocol}://#{config[:host]}:#{config[:port]}/query?db=#{path}"
-    puts url
     RestClient::Request.execute(
       method: :get,
       url: url,
@@ -86,7 +85,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   def run
 
     metric = "\"#{config[:metric]}\""
-    query = "SELECT sum(\"value\") from " + metric + " WHERE time > now() - 24h"
+    query = "SELECT sum(\"value\") from " + metric + " WHERE time > now() - 1h"
 
     encodedparams = Addressable::URI.escape(query)
 
@@ -95,10 +94,16 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     r = request(query)
 
     metrics = JSON.parse(r.to_str)['results']
+
+    puts metrics
     series = metrics[0]['series']
     values = series[0]['values'][0][1]
 
+    if values == nil then puts "Values is null (nil for Ruby developers)"
+    else
     puts values
+
+  end
 
   rescue Errno::ECONNREFUSED => e
     critical 'InfluxDB is not responding' + e.message
