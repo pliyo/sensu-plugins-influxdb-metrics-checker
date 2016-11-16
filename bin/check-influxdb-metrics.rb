@@ -77,14 +77,12 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def getYesterdayQuery()
-    metric = "\"#{config[:metric]}\""
-    query = "SELECT sum(\"value\") from " + metric + " WHERE time > now() - 48h AND time < now() - 24h"
+    query = "SELECT sum(\"value\") from " + "\"#{config[:metric]}\"" + " WHERE time > now() - 48h AND time < now() - 24h"
     return query
   end
 
   def getTodayQuery()
-    metric = "\"#{config[:metric]}\""
-    query = "SELECT sum(\"value\") from " + metric + " WHERE time > now() - 24h"
+    query = "SELECT sum(\"value\") from " + "\"#{config[:metric]}\"" + " WHERE time > now() - 24h"
     return query
   end
 
@@ -125,6 +123,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def run
+    metric = "\"#{config[:metric]}\""
     query = yesterdayQueryEncoded()
     response = request(query)
     value = readMetrics(response)
