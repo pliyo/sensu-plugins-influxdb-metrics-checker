@@ -20,7 +20,7 @@ script:
 deploy:
   provider: rubygems
   api_key:
-    secure: "TODO:"
+    secure: "fdhdtlGTRmoViBWRfL/OgO4IJuOlmLkwmBcaf61K6YyinO/6qMgCV/zat+rF8Wm2VppcCAZjacmV1inkrpYa3vB/q7TasDsk4pjniHMUckoCgyrovSpeNCRKpNu4B81GE03zHzwuDlH11AYEfuh0O7hN0/kULOARvXeqnwvLA58KvF7YL4WKRT7iAF8oQ6E39RLQ/RGaFwBxG0IviVg2nzmIAnknfjsAEXVj9+AoaZiqb6mxEJGYPgyhuFvePXfSv0eOIpPd+vId0BFVpL3s57pKZfIKvPwK9mhqZRyEHrELguAOOMFhnCa0qmajoJlrcqp7V26STdyob5FhdvYE7mz7oKtAb+kp44eaR2XW5/RO4XLQZ57Y6l/NwKcKup6Pz1Ef6LZd5C6y7Q+G8LtyXl98ACFEn/BU7sdw3TIorLKadeYimMl1C9sm9CyaoREJuWf8wZv5kgiGQKtp19tO15MQU0t2ow/q1746Dct/JcZ7GBNL3Zm1HQDv27OoynbeLQ/MEJUl1Rq6hZqlvhYynpcPdJj+8ljaDUtA31gSx899gkqL5I0u6rKUlunyHM1JIKqvmxGajghL4spnPcjc2+vHTrkm3JsOOV6Gq23hl4Ph/kQDAbsYHCa3OBshF2cYvrNBgQ9kwkFdIbX/JbcO3iZE3Ucbo0jqX2cJ88VRgHg="
   gem: sensu-plugins-influxdb-metrics-checker
   on:
     tags: true
