@@ -1,0 +1,32 @@
+language: ruby
+cache:
+- bundler
+install:
+- bundle install
+rvm:
+- 2.0
+- 2.1
+- 2.2
+- 2.3.0
+notifications:
+  email:
+    recipients:
+    - pliyosan@gmail.com
+    on_success: change
+    on_failure: always
+script:
+- bundle exec rake default
+- gem build sensu-plugins-influxdb-metrics-checker.gemspec
+deploy:
+  provider: rubygems
+  api_key:
+    secure: "TODO:"
+  gem: sensu-plugins-influxdb-metrics-checker
+  on:
+    tags: true
+    all_branches: true
+    rvm: 2.0
+    rvm: 2.1
+    rvm: 2.2
+    rvm: 2.3.0
+    repo: pliyosenpai/sensu-plugins-influxdb-metrics-checker
