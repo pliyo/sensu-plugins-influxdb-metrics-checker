@@ -76,20 +76,20 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def yesterday_query
-    'SELECT sum(\"value\") from ' + "\"#{config[:metric]}\"" + ' WHERE time > now() - 48h AND time < now() - 24h'
+    "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 48h AND time < now() - 24h"
   end
 
   def today_query
-    'SELECT sum(\"value\") from ' + "\"#{config[:metric]}\"" + ' WHERE time > now() - 24h'
+    "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 24h"
   end
 
   def yesterday_query_encoded
-    query = get_yesterday_query
+    query = yesterday_query
     encode_parameters(query)
   end
 
   def today_query_encoded
-    query = get_today_query
+    query = today_query
     encode_parameters(query)
   end
 
@@ -134,15 +134,6 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     )
   end
 
-  def exception_handling
-  rescue Errno::ECONNREFUSED => e
-    critical 'InfluxDB is not responding' + e.message
-  rescue RestClient::RequestTimeout
-    critical 'InfluxDB Connection timed out'
-  rescue StandardError => e
-    unknown 'An exception occurred:' + e.message
-  end
-
   def evaluate_percentage_and_notify(difference)
     if difference < config[:crit]
       critical "\"#{config[:metric]}\" sum is below allowed minimum of #{config[:crit]} %"
@@ -154,13 +145,14 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def run
-    puts yesterday_value
-    puts today_value
-
     difference = calculate_percentage_ofdifference(today_value, yesterday_value)
-    puts difference
 
     evaluate_percentage_and_notify(difference)
-    exception_handling
+  rescue Errno::ECONNREFUSED => e
+    critical 'InfluxDB is not responding' + e.message
+  rescue RestClient::RequestTimeout
+    critical 'InfluxDB Connection timed out'
+  rescue StandardError => e
+    unknown 'An exception occurred:' + e.message
   end
 end
