@@ -114,7 +114,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     decrease = original - newnumber
     decreasedPercentage = ( decrease.to_f / original.to_f ) * 100
   end
-  
+
   def request(path)
     protocol = 'http'
     auth = Base64.encode64("#{config[:user]}:#{config[:pass]}")
@@ -138,7 +138,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     secondQuery = todayQueryEncoded()
     responseToCompare = request(secondQuery)
     todayValue = readMetrics(responseToCompare)
-    puts "Today's data"
+    puts "Today's data!!!"
     puts todayValue
 
     difference = getPercentage(todayValue, yesterdayValue)
