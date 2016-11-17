@@ -1,6 +1,6 @@
 # sensu-plugins-influxdb-metrics-checker
 
-[ ![Build Status](https://pliyosenpai/sensu-plugins-influxdb-metrics-checker.svg?branch=master)](https://travis-ci.org/pliyosenpai/sensu-plugins-influxdb-metrics-checker)
+[ ![Build Status](https://travis-ci.org/pliyosenpai/sensu-plugins-influxdb-metrics-checker.svg?branch=master)](https://travis-ci.org/pliyosenpai/sensu-plugins-influxdb-metrics-checker)
 
 Plugin to retrieve metrics and evaluate them. Aiming to track outages.
 
