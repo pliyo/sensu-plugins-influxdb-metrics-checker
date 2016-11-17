@@ -136,21 +136,18 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def evaluate_percentage_and_notify(difference)
     if difference < config[:crit]
-      critical "\"#{config[:metric]}\" sum is below allowed minimum of #{config[:crit]} %"
+      critical "\"#{config[:metric]}\" difference is below allowed minimum of #{config[:crit]} %"
     elsif difference < config[:warn]
-      warning "\"#{config[:metric]}\" sum is below warn threshold of #{config[:warn]}"
+      warning "\"#{config[:metric]}\" difference is below warn threshold of #{config[:warn]}"
     else
       ok 'metrics count ok'
     end
   end
 
   def run
-    puts today_value
-    puts yesterday_value
     difference = calculate_percentage_ofdifference(today_value, yesterday_value)
-
-    puts difference
     evaluate_percentage_and_notify(difference)
+
   rescue Errno::ECONNREFUSED => e
     critical 'InfluxDB is not responding' + e.message
   rescue RestClient::RequestTimeout
