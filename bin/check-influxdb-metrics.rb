@@ -75,12 +75,12 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     "#{config[:db]}&q=" + encodedparams
   end
 
-  def yesterday_query
-    "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 48h AND time < now() - 24h"
+  def yesterday_query # Reads the value from 20 minutes before yesterday at this time.
+    "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 2900m AND time < now() - 2880m"
   end
 
   def today_query
-    "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 24h"
+    "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 20m"
   end
 
   def yesterday_query_encoded
@@ -145,8 +145,11 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def run
+    puts today_value
+    puts yesterday_value
     difference = calculate_percentage_ofdifference(today_value, yesterday_value)
 
+    puts difference
     evaluate_percentage_and_notify(difference)
   rescue Errno::ECONNREFUSED => e
     critical 'InfluxDB is not responding' + e.message
