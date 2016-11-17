@@ -18,10 +18,10 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          required: true
 
   option :port,
-          short: '-p',
-          long: '--port=VALUE',
-          description: 'Api port',
-          required: true
+         short: '-p',
+         long: '--port=VALUE',
+         description: 'Api port',
+         required: true
 
   option :user,
          short: '-u',
@@ -70,49 +70,56 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          long: '--metric=VALUE',
          description: 'Metric to influx DB. Ex datareceivers.messages.count'
 
-  def encodeParameters(parameters)
+  def encode_parameters(parameters)
     encodedparams = Addressable::URI.escape(parameters)
-    query = "#{config[:db]}&q=" + encodedparams
-    return query
+    "#{config[:db]}&q=" + encodedparams
   end
 
-  def getYesterdayQuery()
-    query = "SELECT sum(\"value\") from " + "\"#{config[:metric]}\"" + " WHERE time > now() - 48h AND time < now() - 24h"
-    return query
+  def yesterday_query
+    'SELECT sum(\"value\") from ' + "\"#{config[:metric]}\"" + ' WHERE time > now() - 48h AND time < now() - 24h'
   end
 
-  def getTodayQuery()
-    query = "SELECT sum(\"value\") from " + "\"#{config[:metric]}\"" + " WHERE time > now() - 24h"
-    return query
+  def today_query
+    'SELECT sum(\"value\") from ' + "\"#{config[:metric]}\"" + ' WHERE time > now() - 24h'
   end
 
-  def yesterdayQueryEncoded()
-    query = getYesterdayQuery()
-    queryEncoded = encodeParameters(query)
-    return queryEncoded
+  def yesterday_query_encoded
+    query = get_yesterday_query
+    encode_parameters(query)
   end
 
-  def todayQueryEncoded()
-    query = getTodayQuery()
-    queryEncoded = encodeParameters(query)
-    return queryEncoded
+  def today_query_encoded
+    query = get_today_query
+    encode_parameters(query)
   end
 
-  def readMetrics(response)
+  def today_value
+    second_query = today_query_encoded
+    response_to_compare = request(second_query)
+    read_metrics(response_to_compare)
+  end
+
+  def yesterday_value
+    query = yesterday_query_encoded
+    response = request(query)
+    read_metrics(response)
+  end
+
+  def read_metrics(response)
     metrics = JSON.parse(response.to_str)['results']
     series = metrics[0]['series']
     values = series[0]['values'][0][1]
 
-    if values == nil then
+    if values.nil?
       values = 0
     end
 
-    return values.to_f
+    values.to_f
   end
 
-  def getPercentage(original, newnumber)
+  def calculate_percentage_ofdifference(original, newnumber)
     decrease = original - newnumber
-    decreasedPercentage = ( decrease.to_f / original.to_f ) * 100
+    decrease.to_f / original.to_f * 100
   end
 
   def request(path)
@@ -127,36 +134,33 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     )
   end
 
-  def run
-    metric = "\"#{config[:metric]}\""
-    query = yesterdayQueryEncoded()
-    response = request(query)
-    yesterdayValue = readMetrics(response)
-    puts "Yesterday's Data"
-    puts yesterdayValue
-
-    secondQuery = todayQueryEncoded()
-    responseToCompare = request(secondQuery)
-    todayValue = readMetrics(responseToCompare)
-    puts "Today's data!!!"
-    puts todayValue
-
-    difference = getPercentage(todayValue, yesterdayValue)
-    puts difference
-
-    if difference < config[:crit]
-      critical "\"#{config[:metric]}\" sum is below allowed minimum of #{config[:crit]} %"
-    elsif difference < config[:warn]
-      warning "\"#{config[:metric]}\" sum is below warn threshold of #{config[:warn]}"
-    else
-      ok "metrics count ok"
-    end
-
+  def exception_handling
   rescue Errno::ECONNREFUSED => e
     critical 'InfluxDB is not responding' + e.message
   rescue RestClient::RequestTimeout
     critical 'InfluxDB Connection timed out'
   rescue StandardError => e
     unknown 'An exception occurred:' + e.message
+  end
+
+  def evaluate_percentage_and_notify(difference)
+    if difference < config[:crit]
+      critical "\"#{config[:metric]}\" sum is below allowed minimum of #{config[:crit]} %"
+    elsif difference < config[:warn]
+      warning "\"#{config[:metric]}\" sum is below warn threshold of #{config[:warn]}"
+    else
+      ok 'metrics count ok'
+    end
+  end
+
+  def run
+    puts yesterday_value
+    puts today_value
+
+    difference = calculate_percentage_ofdifference(today_value, yesterday_value)
+    puts difference
+
+    evaluate_percentage_and_notify(difference)
+    exception_handling
   end
 end
