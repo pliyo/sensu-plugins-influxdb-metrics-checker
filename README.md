@@ -3,7 +3,9 @@ Plugin to retrieve metrics and evaluate them. Aiming to track outages.
 
 Example of use:
 
+```
 ruby check-influxdb-metrics.rb --host=metrics-influxdb.internal.com --port=8086 --user=admin --password=password -c -3 -w -10 --db=statsd_metrics --metric=api.request.counter
+```
 
 Important things to now about InfluxDB:
 
