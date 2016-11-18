@@ -70,17 +70,35 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          long: '--metric=VALUE',
          description: 'Metric to influx DB. Ex datareceivers.messages.count'
 
+  option :env,
+         short: '-e',
+         long: '--env=VALUE',
+         description: 'Filter by environment if provided.'
+
+  option :filter,
+         short: '-f',
+         long: '--filter=VALUE',
+         description: 'Set the name of your filter, for example: `datacenter`'
+
   def encode_parameters(parameters)
     encodedparams = Addressable::URI.escape(parameters)
     "#{config[:db]}&q=" + encodedparams
   end
 
+  def filter_by_environment_when_needed(query)
+    if !config[:env].nil? && !config[:filter].nil?
+      query += " AND \"#{config[:env]}\" =~ /#{config[:filter]}/"
+    end
+  end
+
   def yesterday_query # Reads the value from 20 minutes before yesterday at this time.
-    "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 2900m AND time < now() - 2880m"
+    query = "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 2900m AND time < now() - 2880m"
+    query += filter_by_environment_when_needed(query)
   end
 
   def today_query
-    "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 20m"
+    query = "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 20m"
+    query += filter_by_environment_when_needed(query)
   end
 
   def yesterday_query_encoded
@@ -123,7 +141,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def request(path)
-    protocol = 'http'
+    protocol = config[:ssl] ? 'https' : 'http'
     auth = Base64.encode64("#{config[:user]}:#{config[:pass]}")
     url = "#{protocol}://#{config[:host]}:#{config[:port]}/query?db=#{path}"
     RestClient::Request.execute(
