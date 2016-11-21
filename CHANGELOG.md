@@ -3,6 +3,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 This CHANGELOG follows the format listed at [Keep A Changelog](http://keepachangelog.com/)
 
+# [0.2.1] - 2016-11-21
+### Added
+- third release
+Fixing refactor
+
 # [0.2.0] - 2016-11-21
 ### Added
 - second release
@@ -15,4 +20,5 @@ Leaving 5 minutes to the data to consolidate.
 - initial release
 
 [0.1.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.1.0...0.2.0
-[0.2.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.2.0...HEAD
+[0.2.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.2.0...0.2.1
+[0.2.1]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.2.1...HEAD

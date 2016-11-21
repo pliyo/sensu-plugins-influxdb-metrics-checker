@@ -70,7 +70,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          long: '--metric=VALUE',
          description: 'Metric to influx DB. Ex datareceivers.messages.count'
 
-  option :env,
+  option :tag,
          long: '--tag=VALUE',
          description: 'Filter by tag if provided.'
 
@@ -85,8 +85,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def filter_by_environment_when_needed
-    return unless !config[:tag].nil? && !config[:filter].nil?
-    " AND \"#{config[:tag]}\" =~ /#{config[:filter]}/"
+    config[:tag].nil? && config[:filter].nil? ? '' : " AND \"#{config[:tag]}\" =~ /#{config[:filter]}/"
   end
 
   def yesterday_query # Reads the value from 10 minutes before yesterday at this time.
@@ -170,6 +169,6 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   rescue RestClient::RequestTimeout
     critical 'InfluxDB Connection timed out'
   rescue StandardError => e
-    unknown 'An exception occurred:' + e.message
+    unknown 'An exception occurred:' + e.message + e.stacktrace
   end
 end
