@@ -13,7 +13,8 @@ The result is that now we are able to experiment with our metrics and alerts, gi
 ## What it does
 The script will compare the values of yesterday at this time minus 10 minutes, with the values of today at this time minus 10 minus.
 It will calculate the percentage of difference and will act on that.
-You will be able set a threshold of warning and critical values where your program will act.
+You will be able to set a threshold of warning and critical values where your program will act.
+It will also leave it 5 minutes to aggregate the data in influxdb, so we are more precise.
 
 ## Components
 There is just one script that you can find at
