@@ -91,12 +91,12 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def yesterday_query # Reads the value from 20 minutes before yesterday at this time.
-    query = "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 2900m AND time < now() - 2880m"
+    query = "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 2890m AND time < now() - 2880m"
     query + filter_by_environment_when_needed
   end
 
   def today_query
-    query = "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 20m"
+    query = "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 10m"
     query + filter_by_environment_when_needed
   end
 
@@ -163,6 +163,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def run
     difference = calculate_percentage_ofdifference(today_value, yesterday_value)
+    puts difference
     evaluate_percentage_and_notify(difference)
 
   rescue Errno::ECONNREFUSED => e
