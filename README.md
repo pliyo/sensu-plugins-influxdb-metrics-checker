@@ -33,9 +33,9 @@ Once in Sensu:
 /opt/sensu/embedded/bin$ /opt/sensu/embedded/bin/ruby check-influxdb-metrics.rb --host=metrics-influxdb.internal.com --port=8086 --user=admin --password=password -c -3 -w -10 --db=statsd_metrics --metric=api.request.counter
 ```
 
-If you have environments you can filter them by doing:
+If you have a tag you can filter your metrics by doing, for example:
 ```
-ruby check-influxdb-metrics.rb --host=metrics-influxdb.service.veinternal.com --port=8086 --user=admin --password=password -c -20 -w -10 --db=statsd_metrics --metric=datareceivers.request.counter --env=datacenter --filter=ci
+ruby check-influxdb-metrics.rb --host=metrics-influxdb.service.veinternal.com --port=8086 --user=admin --password=password -c -20 -w -10 --db=statsd_metrics --metric=datareceivers.request.counter --tag=datacenter --filter=ci
 
 ```
 
