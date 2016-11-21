@@ -91,7 +91,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def yesterday_query # Reads the value from 10 minutes before yesterday at this time.
-    query = "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 1450m AND time < now() - 1440m"
+    query = "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 1455m AND time < now() - 1445m"
     query + filter_by_environment_when_needed
   end
 
