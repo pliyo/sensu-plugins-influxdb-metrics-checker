@@ -71,9 +71,8 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          description: 'Metric to influx DB. Ex datareceivers.messages.count'
 
   option :env,
-         short: '-e',
-         long: '--env=VALUE',
-         description: 'Filter by environment if provided.'
+         long: '--tag=VALUE',
+         description: 'Filter by tag if provided.'
 
   option :filter,
          short: '-f',
@@ -86,8 +85,8 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def filter_by_environment_when_needed
-    return unless !config[:env].nil? && !config[:filter].nil?
-    " AND \"#{config[:env]}\" =~ /#{config[:filter]}/"
+    return unless !config[:tag].nil? && !config[:filter].nil?
+    " AND \"#{config[:tag]}\" =~ /#{config[:filter]}/"
   end
 
   def yesterday_query # Reads the value from 10 minutes before yesterday at this time.
