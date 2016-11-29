@@ -81,7 +81,9 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   option :period,
          long: '--period=VALUE',
-         description: 'Filter by a given day instead of the last 10 minutes'
+         description: 'Filter by a given day period in minutes',
+         proc: proc { |l| l.to_i },
+         default: 10
 
   def filter_by_environment_when_needed
     config[:tag].nil? && config[:filter].nil? ? '' : " AND \"#{config[:tag]}\" =~ /#{config[:filter]}/"
@@ -91,26 +93,22 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     "SELECT sum(\"value\") from \"#{config[:metric]}\" "
   end
 
-  def period
-    config[:period].nil? ? 10 : config[:period].to_i # by default set a period of 10 minutes
-  end
-
   def today_query_for_a_period
-    start_date = '5'; # starts 5 minutes before now() to let influxdb time to aggregate the data
-    end_date = period + 5; # adds 5 minutes to match with start_date
-    query = query_for_a_period(start_date, end_date)
+    start_period = '5'; # starts 5 minutes before now() to let influxdb time to aggregate the data
+    end_period = config[:period] + 5; # adds 5 minutes to match with start_period
+    query = query_for_a_period(start_period, end_period)
     query + filter_by_environment_when_needed
   end
 
   def yesterday_query_for_a_period
-    start_date = '1445'; # starts minus 1445 minutes before now() [ yesetrday - 5 minutes] to match with today_query_for_a_period start_date
-    end_date = period + 1445; # adds 1445 minutes to match with start_date
-    query = query_for_a_period(start_date, end_date)
+    start_period = '1445'; # starts minus 1445 minutes before now() [ yesetrday - 5 minutes] to match with today_query_for_a_period start_period
+    end_period = config[:period] + 1445; # adds 1445 minutes to match with start_period
+    query = query_for_a_period(start_period, end_period)
     query + filter_by_environment_when_needed
   end
 
-  def query_for_a_period(start_date, end_date)
-    query = base_query + ' WHERE time > now() - ' + end_date.to_s + 'm AND time < now() - ' + start_date + 'm'
+  def query_for_a_period(start_period, end_period)
+    query = base_query + ' WHERE time > now() - ' + end_period.to_s + 'm AND time < now() - ' + start_period + 'm'
     query + filter_by_environment_when_needed
   end
 
@@ -182,7 +180,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def run
     difference = calculate_percentage_ofdifference(today_value, yesterday_value)
-    puts 'Difference of: ' + difference.to_s + ' %   for a period of ' + period.to_s + 'm'
+    puts 'Difference of: ' + difference.to_s + ' %   for a period of ' + config[:period].to_s + 'm'
     evaluate_percentage_and_notify(difference)
 
   rescue Errno::ECONNREFUSED => e
