@@ -40,7 +40,7 @@ ruby check-influxdb-metrics.rb --host=metrics-influxdb.internal.com --port=8086 
 
 ```
 
-In version 0.3.0 and onwards, you can set the period that you want for your queries, for example:
+Also, you can set the period that you want for your queries, for example:
 ```
 ruby check-influxdb-metrics.rb --host=metrics-influxdb.internal.com --port=8086 --user=admin --password=password -c -20 -w -10 --db=statsd_metrics --metric=api.request.counter --tag=datacenter --filter=ci --period=1440
 
