@@ -6,7 +6,8 @@ This CHANGELOG follows the format listed at [Keep A Changelog](http://keepachang
 # [0.3.0] - 2016-11-21
 ### Added
 - fourth release
-Added the possibility to query by the whole day of yesterday by adding --day in your parameters
+Added the possibility to tweak your queries by adding --period in your parameters.
+By default --period will be 10 minutes to work with previous versions
 
 # [0.2.1] - 2016-11-21
 ### Added

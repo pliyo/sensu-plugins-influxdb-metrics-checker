@@ -7,7 +7,7 @@ require_relative './lib/sensu-plugins-influxdb-metrics-checker'
 Gem::Specification.new do |s|
   s.authors                = ['Juanjo Guerrero Cerezuela']
   s.date                   = Date.today.to_s
-  s.description            = 'This plugin retrieves metrics and evaluate them. Aiming to track downsides.'
+  s.description            = 'This plugin retrieves metrics and evaluate them. Aiming to track outages.'
   s.email                  = '<pliyosan@gmail.com>'
   s.executables            = Dir.glob('bin/**/*.rb').map { |file| File.basename(file) }
   s.files                  = Dir.glob('{bin,lib}/**/*') + %w(LICENSE README.md CHANGELOG.md)
