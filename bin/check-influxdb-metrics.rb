@@ -88,26 +88,26 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def base_query
-      query = "SELECT sum(\"value\") from \"#{config[:metric]}\" "
+    query = "SELECT sum(\"value\") from \"#{config[:metric]}\" "
   end
 
   def today_query_for_a_day
-    query = base_query + " WHERE time > now() - 1445m AND time < now() - 5m"
+    query = base_query + ' WHERE time > now() - 1445m AND time < now() - 5m'
     query + filter_by_environment_when_needed
   end
 
   def yesterday_query_for_a_day
-    query = base_query + " WHERE time > now() - 2885m AND time < now() - 1445m"
+    query = base_query + ' WHERE time > now() - 2885m AND time < now() - 1445m'
     query + filter_by_environment_when_needed
   end
 
   def yesterday_query_for_ten_minutes # Reads the value from 10 minutes before yesterday at this time.
-    query = base_query + " WHERE time > now() - 1455m AND time < now() - 1445m"
+    query = base_query + ' WHERE time > now() - 1455m AND time < now() - 1445m'
     query + filter_by_environment_when_needed
   end
 
   def today_query_for_ten_minutes
-    query = base_query + " WHERE time > now() - 15m AND time < now() - 5m"
+    query = base_query + ' WHERE time > now() - 15m AND time < now() - 5m'
     query + filter_by_environment_when_needed
   end
 
@@ -179,7 +179,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def run
     difference = calculate_percentage_ofdifference(today_value, yesterday_value)
-    puts "Difference of: " + difference.to_s + " %"
+    puts 'Difference of: ' + difference.to_s + ' %'
     evaluate_percentage_and_notify(difference)
 
   rescue Errno::ECONNREFUSED => e
