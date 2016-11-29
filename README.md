@@ -1,7 +1,7 @@
 # sensu-plugins-influxdb-metrics-checker
 
 [ ![Build Status](https://travis-ci.org/pliyosenpai/sensu-plugins-influxdb-metrics-checker.svg?branch=master)](https://travis-ci.org/pliyosenpai/sensu-plugins-influxdb-metrics-checker)
-[![Gem Version](https://badge.fury.io/rb/sensu-plugins-influxdb-metrics-checker.svg)](http://badge.fury.io/rb/sensu-plugins-influxdb-metrics-checker.svg)
+[![Gem Version](https://badge.fury.io/rb/sensu-plugins-influxdb-metrics-checker.svg)](https://rubygems.org/gems/sensu-plugins-influxdb-metrics-checker)
 
 ## Background story
 As soon as we started using InfluxDB we were wondering how we could read a given metric, compare it to its previous days, evaluate the percentage of difference, and act according to it.
@@ -36,7 +36,13 @@ Once in Sensu:
 
 If you have a tag you can filter your metrics by doing, for example:
 ```
-ruby check-influxdb-metrics.rb --host=metrics-influxdb.service.veinternal.com --port=8086 --user=admin --password=password -c -20 -w -10 --db=statsd_metrics --metric=datareceivers.request.counter --tag=datacenter --filter=ci
+ruby check-influxdb-metrics.rb --host=metrics-influxdb.internal.com --port=8086 --user=admin --password=password -c -20 -w -10 --db=statsd_metrics --metric=api.request.counter --tag=datacenter --filter=ci
+
+```
+
+Also, you can set the period that you want for your queries, for example:
+```
+ruby check-influxdb-metrics.rb --host=metrics-influxdb.internal.com --port=8086 --user=admin --password=password -c -20 -w -10 --db=statsd_metrics --metric=api.request.counter --tag=datacenter --filter=ci --period=1440
 
 ```
 
