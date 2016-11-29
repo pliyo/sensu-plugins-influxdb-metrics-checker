@@ -36,7 +36,13 @@ Once in Sensu:
 
 If you have a tag you can filter your metrics by doing, for example:
 ```
-ruby check-influxdb-metrics.rb --host=metrics-influxdb.service.veinternal.com --port=8086 --user=admin --password=password -c -20 -w -10 --db=statsd_metrics --metric=datareceivers.request.counter --tag=datacenter --filter=ci
+ruby check-influxdb-metrics.rb --host=metrics-influxdb.internal.com --port=8086 --user=admin --password=password -c -20 -w -10 --db=statsd_metrics --metric=api.request.counter --tag=datacenter --filter=ci
+
+```
+
+In version 0.3.0 and onwards, you can set the period that you want for your queries, for example:
+```
+ruby check-influxdb-metrics.rb --host=metrics-influxdb.internal.com --port=8086 --user=admin --password=password -c -20 -w -10 --db=statsd_metrics --metric=api.request.counter --tag=datacenter --filter=ci --period=1440
 
 ```
 
