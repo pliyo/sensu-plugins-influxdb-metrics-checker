@@ -88,11 +88,11 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def base_query
-    query = "SELECT sum(\"value\") from \"#{config[:metric]}\" "
+    "SELECT sum(\"value\") from \"#{config[:metric]}\" "
   end
 
   def period
-    period = config[:period].nil? ? 10 : config[:period].to_i # by default set a period of 10 minutes
+    config[:period].nil? ? 10 : config[:period].to_i # by default set a period of 10 minutes
   end
 
   def today_query_for_a_period
@@ -182,7 +182,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def run
     difference = calculate_percentage_ofdifference(today_value, yesterday_value)
-    puts 'Difference of: ' + difference.to_s + ' %   for a period of ' + period.to_s  + 'm' 
+    puts 'Difference of: ' + difference.to_s + ' %   for a period of ' + period.to_s + 'm'
     evaluate_percentage_and_notify(difference)
 
   rescue Errno::ECONNREFUSED => e
