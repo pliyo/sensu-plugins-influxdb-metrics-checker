@@ -94,14 +94,14 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def today_query_for_a_period
-    start_period = '5'; # starts 5 minutes before now() to let influxdb time to aggregate the data
+    start_period = '5'; # starts counting 5 minutes before now() to let influxdb time to aggregate the data
     end_period = config[:period] + 5; # adds 5 minutes to match with start_period
     query = query_for_a_period(start_period, end_period)
     query + filter_by_environment_when_needed
   end
 
   def yesterday_query_for_a_period
-    start_period = '1445'; # starts minus 1445 minutes before now() [ yesetrday - 5 minutes] to match with today_query_for_a_period start_period
+    start_period = '1445'; # starts counting 1445 minutes before now() [ yesetrday - 5 minutes] to match with today_query_for_a_period start_period
     end_period = config[:period] + 1445; # adds 1445 minutes to match with start_period
     query = query_for_a_period(start_period, end_period)
     query + filter_by_environment_when_needed
