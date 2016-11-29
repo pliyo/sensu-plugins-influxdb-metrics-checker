@@ -79,32 +79,50 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          long: '--filter=VALUE',
          description: 'Set the name of your filter, for example: `datacenter`'
 
-  def encode_parameters(parameters)
-    encodedparams = Addressable::URI.escape(parameters)
-    "#{config[:db]}&q=" + encodedparams
-  end
+  option :day,
+         long: '--day=VALUE',
+         description: 'Filter by a given day instead of the last 10 minutes'
 
   def filter_by_environment_when_needed
     config[:tag].nil? && config[:filter].nil? ? '' : " AND \"#{config[:tag]}\" =~ /#{config[:filter]}/"
   end
 
-  def yesterday_query # Reads the value from 10 minutes before yesterday at this time.
-    query = "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 1455m AND time < now() - 1445m"
+  def base_query
+      query = "SELECT sum(\"value\") from \"#{config[:metric]}\" "
+  end
+
+  def today_query_for_a_day
+    query = base_query + " WHERE time > now() - 1445m AND time < now() - 5m"
     query + filter_by_environment_when_needed
   end
 
-  def today_query
-    query = "SELECT sum(\"value\") from \"#{config[:metric]}\" WHERE time > now() - 15m AND time < now() - 5m"
+  def yesterday_query_for_a_day
+    query = base_query + " WHERE time > now() - 2885m AND time < now() - 1445m"
     query + filter_by_environment_when_needed
+  end
+
+  def yesterday_query_for_ten_minutes # Reads the value from 10 minutes before yesterday at this time.
+    query = base_query + " WHERE time > now() - 1455m AND time < now() - 1445m"
+    query + filter_by_environment_when_needed
+  end
+
+  def today_query_for_ten_minutes
+    query = base_query + " WHERE time > now() - 15m AND time < now() - 5m"
+    query + filter_by_environment_when_needed
+  end
+
+  def encode_parameters(parameters)
+    encodedparams = Addressable::URI.escape(parameters)
+    "#{config[:db]}&q=" + encodedparams
   end
 
   def yesterday_query_encoded
-    query = yesterday_query
+    query = config[:day].nil? ? yesterday_query_for_ten_minutes : yesterday_query_for_a_day
     encode_parameters(query)
   end
 
   def today_query_encoded
-    query = today_query
+    query = config[:day].nil? ? today_query_for_ten_minutes : today_query_for_a_day
     encode_parameters(query)
   end
 
@@ -161,7 +179,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def run
     difference = calculate_percentage_ofdifference(today_value, yesterday_value)
-    puts difference
+    puts "Difference of: " + difference.to_s + " %"
     evaluate_percentage_and_notify(difference)
 
   rescue Errno::ECONNREFUSED => e
@@ -169,6 +187,6 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   rescue RestClient::RequestTimeout
     critical 'InfluxDB Connection timed out'
   rescue StandardError => e
-    unknown 'An exception occurred:' + e.message + e.stacktrace
+    unknown 'An exception occurred:' + e.message
   end
 end
