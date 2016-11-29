@@ -1,7 +1,7 @@
 # sensu-plugins-influxdb-metrics-checker
 
 [ ![Build Status](https://travis-ci.org/pliyosenpai/sensu-plugins-influxdb-metrics-checker.svg?branch=master)](https://travis-ci.org/pliyosenpai/sensu-plugins-influxdb-metrics-checker)
-[![Gem Version](https://badge.fury.io/rb/sensu-plugins-influxdb-metrics-checker.svg)](http://badge.fury.io/rb/sensu-plugins-influxdb-metrics-checker.svg)
+[![Gem Version](https://badge.fury.io/rb/sensu-plugins-influxdb-metrics-checker.svg)](https://rubygems.org/gems/sensu-plugins-influxdb-metrics-checker)
 
 ## Background story
 As soon as we started using InfluxDB we were wondering how we could read a given metric, compare it to its previous days, evaluate the percentage of difference, and act according to it.
