@@ -3,6 +3,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 This CHANGELOG follows the format listed at [Keep A Changelog](http://keepachangelog.com/)
 
+# [0.3.1] - 2016-12-14
+### Added
+- fifth release
+Rounded float result to 5 decimal places
+
 # [0.3.0] - 2016-11-21
 ### Added
 - fourth release
@@ -28,4 +33,5 @@ Leaving 5 minutes to the data to consolidate.
 [0.1.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.1.0...0.2.0
 [0.2.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.2.0...0.2.1
 [0.2.1]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.2.1...0.3.0
-[0.3.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.3.0...HEAD
+[0.3.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.3.0...0.3.1
+[0.3.1]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.3.1...HEAD
