@@ -180,7 +180,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def run
     difference = calculate_percentage_ofdifference(today_value, yesterday_value)
-    puts 'Difference of: ' + difference.round(5).to_s + ' %   for a period of ' + config[:period].to_s + 'm'
+    puts 'Difference of: ' + difference.round(5).to_s + ' %  for a period of ' + config[:period].to_s + 'm'
     evaluate_percentage_and_notify(difference)
 
   rescue Errno::ECONNREFUSED => e
