@@ -129,12 +129,13 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def encode_parameters(parameters)
     encodedparams = Addressable::URI.escape(parameters)
-    puts encodedparams
+
     if $usingRegex
       encode_for_regex = encodedparams.gsub! '+', '%2B'
     else
       encode_for_regex = encodedparams
     end
+
     "#{config[:db]}&q=" + encode_for_regex
   end
 
@@ -151,6 +152,8 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   def today_value
     second_query = today_query_encoded
     response_to_compare = request(second_query)
+    puts "TODAY!!"
+    puts response_to_compare
     read_metrics(response_to_compare)
   end
 
@@ -158,6 +161,8 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     query = yesterday_query_encoded
     puts query
     response = request(query)
+    puts "YESTERDAY!!"
+    puts response
     read_metrics(response)
   end
 
@@ -169,7 +174,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     else
       series = metrics[0]['series']
       values = series[0]['values'][0][1]
-
+      
       if values.nil?
         values = 0
       end
