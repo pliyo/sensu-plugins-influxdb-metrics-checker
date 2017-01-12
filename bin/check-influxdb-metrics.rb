@@ -90,7 +90,22 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def base_query
-    "SELECT sum(\"value\") from \"#{config[:metric]}\" "
+    #baseQuery = "SELECT sum(\"value\") from \"#{config[:metric]}\" "
+    cleanquery = "SELECT sum(\"value\") from " + clean_quotes_when_regex
+    #cleanquery
+  end
+
+  def clean_quotes_when_regex
+    metric = " \"#{config[:metric]}\""
+    clean_metric = ''
+    if metric.include?('/')
+      clean_metric = metric.tr '\"', ''
+      $usingRegex = true
+    else
+      clean_metric = metric
+    end
+
+    clean_metric
   end
 
   def today_query_for_a_period
@@ -114,7 +129,13 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def encode_parameters(parameters)
     encodedparams = Addressable::URI.escape(parameters)
-    "#{config[:db]}&q=" + encodedparams
+    puts encodedparams
+    if $usingRegex
+      encode_for_regex = encodedparams.gsub! '+', '%2B'
+    else
+      encode_for_regex = encodedparams
+    end
+    "#{config[:db]}&q=" + encode_for_regex
   end
 
   def yesterday_query_encoded
@@ -135,20 +156,26 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def yesterday_value
     query = yesterday_query_encoded
+    puts query
     response = request(query)
     read_metrics(response)
   end
 
   def read_metrics(response)
     metrics = JSON.parse(response.to_str)['results']
-    series = metrics[0]['series']
-    values = series[0]['values'][0][1]
+    if metrics[0]['series'].nil?
+      puts "No results coming from InfluxDB. Please check your query"
+      metrics = nil
+    else
+      series = metrics[0]['series']
+      values = series[0]['values'][0][1]
 
-    if values.nil?
-      values = 0
+      if values.nil?
+        values = 0
+      end
+
+      values.to_f
     end
-
-    values.to_f
   end
 
   def calculate_percentage_ofdifference(original, newnumber)
@@ -179,15 +206,20 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def run
-    difference = calculate_percentage_ofdifference(today_value, yesterday_value)
-    puts 'Difference of: ' + difference.round(5).to_s + ' %  for a period of ' + config[:period].to_s + 'm'
-    evaluate_percentage_and_notify(difference)
+    if(today_value.nil? && yesterday_value.nil?)
+      puts "Please revisit your query"
+    else
+      difference = calculate_percentage_ofdifference(today_value, yesterday_value)
+      puts 'Difference of: ' + difference.round(5).to_s + ' %  for a period of ' + config[:period].to_s + 'm'
+      evaluate_percentage_and_notify(difference)
+    end
+  exit
 
   rescue Errno::ECONNREFUSED => e
     critical 'InfluxDB is not responding' + e.message
   rescue RestClient::RequestTimeout
     critical 'InfluxDB Connection timed out'
   rescue StandardError => e
-    unknown 'An exception occurred:' + e.message
+    unknown 'An exception occurred: ' + e.message
   end
 end
