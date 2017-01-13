@@ -90,9 +90,11 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def base_query
-    #baseQuery = "SELECT sum(\"value\") from \"#{config[:metric]}\" "
-    cleanquery = "SELECT sum(\"value\") from " + clean_quotes_when_regex
-    #cleanquery
+    "SELECT sum(\"value\") from "
+  end
+
+  def base_query_with_metricname
+    base_query + clean_quotes_when_regex
   end
 
   def clean_quotes_when_regex
@@ -100,7 +102,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     clean_metric = ''
     if metric.include?('/')
       clean_metric = metric.tr '\"', ''
-      $usingRegex = true
+      @is_using_regex = true
     else
       clean_metric = metric
     end
@@ -123,14 +125,14 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def query_for_a_period(start_period, end_period)
-    query = base_query + ' WHERE time > now() - ' + end_period.to_s + 'm AND time < now() - ' + start_period.to_s + 'm'
+    query = base_query_with_metricname + ' WHERE time > now() - ' + end_period.to_s + 'm AND time < now() - ' + start_period.to_s + 'm'
     query + filter_by_environment_when_needed
   end
 
   def encode_parameters(parameters)
     encodedparams = Addressable::URI.escape(parameters)
 
-    if $usingRegex
+    if @is_using_regex
       encode_for_regex = encodedparams.gsub! '+', '%2B'
     else
       encode_for_regex = encodedparams
@@ -150,40 +152,91 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def today_value
-    second_query = today_query_encoded
-    response_to_compare = request(second_query)
-    puts "TODAY!!"
-    puts response_to_compare
-    read_metrics(response_to_compare)
+    response = request(today_query_encoded)
+    metrics = parse_json(response)
+    @today_metric_count = count_metrics(metrics)
+    series = read_series_of_metrics(metrics)
+    @today_metrics = store_metrics(series)
+    read_values_of_series(series)
   end
 
   def yesterday_value
-    query = yesterday_query_encoded
-    puts query
-    response = request(query)
-    puts "YESTERDAY!!"
-    puts response
-    read_metrics(response)
+    response = request(yesterday_query_encoded)
+    metrics = parse_json(response)
+    @yesterday_metric_count = count_metrics(metrics)
+    series = read_series_of_metrics(metrics)
+    @yesterday_metrics = store_metrics(series)
+    read_values_of_series(series)
   end
 
-  def read_metrics(response)
-    metrics = JSON.parse(response.to_str)['results']
+  def count_metrics(metrics)
     if metrics[0]['series'].nil?
-      puts "No results coming from InfluxDB. Please check your query"
-      metrics = nil
+      0
     else
-      series = metrics[0]['series']
-      values = series[0]['values'][0][1]
-      
-      if values.nil?
-        values = 0
-      end
+      metrics[0]['series'].count
+    end
+  end
 
-      values.to_f
+  def parse_json(response)
+    JSON.parse(response.to_str)['results']
+  end
+
+  def read_values_of_series(series)
+    values = series[0]['values'][0][1]
+    values.to_f
+  end
+
+  def read_series_of_metrics(metrics)
+    if metrics[0]['series'].nil?
+      puts 'No results coming from InfluxDB. Please check your query'
+      nil
+    else
+      metrics[0]['series']
+    end
+  end
+
+  def store_metrics(series)
+    regex_metrics = Hash.new()
+    if series.count > 0
+      series.each do |values|
+        value = values['values'][0][1]
+        key = values['name']
+        value_float = value.to_f
+
+        regex_metrics[key] = value_float
+      end
+      regex_metrics
+    end
+  end
+
+  def display_metrics
+    @yesterday_metrics.each do |key, value|
+      puts key
+      puts value
+    end
+    @today_metrics.each do |key, value|
+      puts key
+      puts value
     end
   end
 
   def calculate_percentage_ofdifference(original, newnumber)
+    if @is_using_regex
+      difference_for_regex
+    else
+      difference_between_two_metrics(original, newnumber)
+    end
+  end
+
+  def difference_for_regex
+    if @today_metric_count >= @yesterday_metric_count
+      0
+    else
+      -100 # different or more number of metrics could be a problem. Regex is designed to catch exceptions, so more exceptions -> alert
+    end
+  end
+
+  def difference_between_two_metrics(original, newnumber)
     decrease = original - newnumber
     decrease.to_f / original.to_f * 100
   end
@@ -210,13 +263,19 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     end
   end
 
+  def calculate_difference_and_display_result(today, yesterday)
+    difference = calculate_percentage_ofdifference(today, yesterday)
+    puts 'Difference of: ' + difference.round(5).to_s + ' %  for a period of ' + config[:period].to_s + 'm'
+    evaluate_percentage_and_notify(difference)
+  end
+
   def run
-    if(today_value.nil? && yesterday_value.nil?)
-      puts "Please revisit your query"
+    today = today_value
+    yesterday = yesterday_value
+    if today.nil? && yesterday.nil?
+      puts 'Please revisit your query'
     else
-      difference = calculate_percentage_ofdifference(today_value, yesterday_value)
-      puts 'Difference of: ' + difference.round(5).to_s + ' %  for a period of ' + config[:period].to_s + 'm'
-      evaluate_percentage_and_notify(difference)
+      calculate_difference_and_display_result(today, yesterday)
     end
   exit
 
