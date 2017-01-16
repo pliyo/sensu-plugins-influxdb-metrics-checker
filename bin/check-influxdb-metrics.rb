@@ -222,7 +222,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def display_metrics
-    puts 'Today metrics: '
+    puts 'Today metrics analysis: '
     @today_metrics.each do |key, value|
       puts 'For: ' + key + ' : ' + value.to_s
     end
@@ -298,10 +298,8 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   def difference_in_metrics
     today = today_value
     yesterday = yesterday_value
-    if today.nil? && @is_using_regex == false
-      puts 'No results coming from InfluxDB for Today. Please check your query or try again'
-    elsif yesterday.nil? && @is_using_regex == false
-      puts 'No results coming from InfluxDB for Yesterday. Please check your query or try again'
+    if today.nil? && yesterday.nil?
+      puts 'No results coming from InfluxDB either for Today nor Yesterday. Please check your query or try again'
     else
       calculate_difference_and_display_result(today, yesterday)
     end
