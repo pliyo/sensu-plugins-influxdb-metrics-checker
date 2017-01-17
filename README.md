@@ -40,11 +40,23 @@ ruby check-influxdb-metrics.rb --host=metrics-influxdb.internal.com --port=8086 
 
 ```
 
-Also, you can set the period that you want for your queries, for example:
+You can set the period that you want for your queries, for example:
 ```
 ruby check-influxdb-metrics.rb --host=metrics-influxdb.internal.com --port=8086 --user=admin --password=password -c -20 -w -10 --db=statsd_metrics --metric=api.request.counter --tag=datacenter --filter=ci --period=1440
 
 ```
+
+## Advanced Queries
+
+You can also query Regex expressions. Which I recommend to use only for exceptions, and always aim for a zero exception policy. How it works:
+1. It will compare the number of metrics gathered today vs the number of metrics gathered yesterday.
+2. If today we read more than yesterday, it will blow up as Critical.
+3. If today we read the same number of metrics than yesterday, at the moment it will compare only the first one. I'll not rely on this tool (yet) for a deep analysis of differences in exceptions.
+```
+ruby check-influxdb-metrics.rb --host=metrics-influxdb.internal.com --port=8086 --user=admin --password=password -c -20 -w -10 --db=statsd_metrics --metric="/^prefix.datacenter.([A-Za-z0-9-]+).([A-Za-z0-9-]+).exceptions$/"
+
+```
+
 
 ## Lessons learnt
 The InfluxDb query language that we used is not the latest, you can find it here:

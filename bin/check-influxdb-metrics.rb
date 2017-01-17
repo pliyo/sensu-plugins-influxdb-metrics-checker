@@ -131,7 +131,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def encode_parameters(parameters)
     encodedparams = Addressable::URI.escape(parameters)
-
+    # this is needed after encoding because Addressable will not encode +. So for ex: ([A-Za-z0-9-]+) will miss the + and with that it will not find the metrics
     encode_for_regex = if @is_using_regex
                          encodedparams.gsub! '+', '%2B'
                        else
