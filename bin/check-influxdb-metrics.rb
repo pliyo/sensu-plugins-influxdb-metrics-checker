@@ -85,6 +85,10 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          proc: proc { |l| l.to_i },
          default: 10
 
+  option :triangulate,
+         long: '--triangulate=VALUE',
+         description: 'Triangulate with this metric'
+
   def filter_by_environment_when_needed
     config[:tag].nil? && config[:filter].nil? ? '' : " AND \"#{config[:tag]}\" =~ /#{config[:filter]}/"
   end
@@ -282,12 +286,11 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def calculate_difference_and_display_result(today, yesterday)
-    difference = if @is_using_regex
-                   difference_for_regex_and_notify
-                 else
-                   difference_for_standard_queries(today, yesterday)
-                 end
-    difference
+    if @is_using_regex
+      difference_for_regex_and_notify
+    else
+      difference_for_standard_queries(today, yesterday)
+    end
   end
 
   def difference_for_standard_queries(today, yesterday)
@@ -306,8 +309,21 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     exit
   end
 
+  def triangulation?
+    triang = config[:triangulate].to_s
+    triang.to_s.nil?
+  end
+
+  def check_metrics_in_influxdb
+    if triangulation?
+      difference_between_percentages_of_two_metrics
+    else
+      difference_in_metrics
+    end
+  end
+
   def run
-    difference_in_metrics
+    check_metrics_in_influxdb
 
   rescue Errno::ECONNREFUSED => e
     critical 'InfluxDB is not responding' + e.message
