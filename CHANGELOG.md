@@ -3,7 +3,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 This CHANGELOG follows the format listed at [Keep A Changelog](http://keepachangelog.com/)
 
-# [0.3.3] - 2017-01-17
+# [0.3.4] - 2017-01-17
 - sixth release
 Allow the usage of regex expressions that we can identify as "/^[your_regex]$". I'll strongly recommend to use this only for exceptions, and always aim for zero-exceptions, or it wouldn't be accurate. At the moment it will fire when the number of exception today is bigger than the number of exceptions yesterday.
 Also, if you have the same number of metrics found (let's say, exceptions) it will compare just the first one. I'll not rely on this tool (yet) for a deep analysis of differences in exceptions.
@@ -40,5 +40,5 @@ Leaving 5 minutes to the data to consolidate.
 [0.2.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.2.0...0.2.1
 [0.2.1]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.2.1...0.3.0
 [0.3.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.3.0...0.3.2
-[0.3.2]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.3.2...0.3.3
-[0.3.3]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.3.3...HEAD
+[0.3.2]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.3.2...0.3.4
+[0.3.3]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.3.4...HEAD
