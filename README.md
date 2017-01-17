@@ -48,10 +48,14 @@ ruby check-influxdb-metrics.rb --host=metrics-influxdb.internal.com --port=8086 
 
 ## Advanced Queries
 
-You can also query Regex expressions. Which I recommend to use only for exceptions, and always aim for a zero exception policy. How it works:
-1. It will compare the number of metrics gathered today vs the number of metrics gathered yesterday.
-2. If today we read more than yesterday, it will blow up as Critical.
-3. If today we read the same number of metrics than yesterday, at the moment it will compare only the first one. I'll not rely on this tool (yet) for a deep analysis of differences in exceptions.
+You can use Regex in your metrics. The spirit behind this feature is to gather information about exceptions only, always aiming for a zero exception policy. So I'll advise against using it for other purposes.
+
+**How it works**
+1. It will understand that is a regex only when the metric name contains '/'. In the bash you'll need to include your metric inside double quotes.
+2. It will compare the number of metrics gathered today vs the number of metrics gathered yesterday.
+3. If today we read more than yesterday, it will blow up as **Critical**.
+4. If today we read the same number of metrics than yesterday, at the moment it will compare only the first one.
+I'll not rely on this tool (yet) for a deep analysis of differences when comparing multiple metrics (such as exceptions) using Regex.
 ```
 ruby check-influxdb-metrics.rb --host=metrics-influxdb.internal.com --port=8086 --user=admin --password=password -c -20 -w -10 --db=statsd_metrics --metric="/^prefix.datacenter.([A-Za-z0-9-]+).([A-Za-z0-9-]+).exceptions$/"
 
