@@ -83,7 +83,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          long: '--period=VALUE',
          description: 'Filter by a given day period in minutes',
          proc: proc { |l| l.to_i },
-         default: 10
+         default: 25
 
   option :triangulate,
          long: '--triangulate=VALUE',
@@ -93,30 +93,21 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          long: '--applyfilterbothqueries=VALUE',
          description: 'Set if you want to apply tag and filter also for the query that you are about to triangulate with'
 
-  BASE_QUERY = 'SELECT sum("value") from '.freeze
+  option :distance,
+         long: '--distance=VALUE',
+         description: 'Set the distance threshold to alert in case of triangulation',
+         default: 10
 
-  def today_start_period
-    20 # starts counting 5 minutes before now() to let influxdb time to aggregate the data
+  BASE_QUERY = 'SELECT sum("value") from '.freeze
+  TODAY_START_PERIOD = 10
+  YESTERDAY_START_PERIOD = 1455 # starts counting 1455 minutes before now() [ yesetrday - 10 minutes] to match with today_query_for_a_period start_period
+
+  def yesterday_end_period
+    config[:period] + YESTERDAY_START_PERIOD
   end
 
   def today_end_period
-    config[:period] + 20 # adds 5 minutes to match with start_period
-  end
-
-  def yesterday_start_period
-    1460 # starts counting 1445 minutes before now() [ yesetrday - 5 minutes] to match with today_query_for_a_period start_period
-  end
-
-  def yesterday_end_period
-    config[:period] + 1460 # adds 1445 minutes to match with start_period
-  end
-
-  def filter_by_environment_when_needed
-    config[:tag].nil? && config[:filter].nil? ? '' : " AND \"#{config[:tag]}\" =~ /#{config[:filter]}/"
-  end
-
-  def filter_for_triangulate_when_needed
-    config[:applyfilterbothqueries].nil? ? '' : " AND \"#{config[:tag]}\" =~ /#{config[:filter]}/"
+    config[:period] + TODAY_START_PERIOD
   end
 
   def base_query_with_metricname(metric)
@@ -136,6 +127,14 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     clean_metric
   end
 
+  def filter_by_environment_when_needed
+    config[:tag].nil? && config[:filter].nil? ? '' : " AND \"#{config[:tag]}\" =~ /#{config[:filter]}/"
+  end
+
+  def filter_for_triangulate_when_needed
+    config[:applyfilterbothqueries].nil? ? '' : " AND \"#{config[:tag]}\" =~ /#{config[:filter]}/"
+  end
+
   def query_for_a_period(metric, start_period, end_period, istriangulated)
     query = base_query_with_metricname(metric) + ' WHERE time > now() - ' + end_period.to_s + 'm AND time < now() - ' + start_period.to_s + 'm'
     query + add_filter_when_needed(istriangulated)
@@ -151,7 +150,6 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def query_encoded_for_a_period(metric, start_period, end_period, istriangulated)
     query = query_for_a_period(metric, start_period, end_period, istriangulated)
-    puts query
     encode_parameters(query)
   end
 
@@ -159,9 +157,6 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     query = query_encoded_for_a_period(metric, start_period, end_period, istriangulated)
     response = request(query)
     parse_json(response)
-  end
-
-  def triangulated_metric(metric, start_period, end_period)
   end
 
   def encode_parameters(parameters)
@@ -177,7 +172,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def today_metrics
-    today_info = metrics(config[:metric], today_start_period, today_end_period, false)
+    today_info = metrics(config[:metric], TODAY_START_PERIOD, today_end_period, false)
     @today_metric_count = validate_metrics_and_count(today_info)
     value = if @today_metric_count > 0
               series = read_series_from_metrics(today_info)
@@ -188,7 +183,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def yesterday_metrics
-    yesterday_info = metrics(config[:metric], yesterday_start_period, yesterday_end_period, false)
+    yesterday_info = metrics(config[:metric], YESTERDAY_START_PERIOD, yesterday_end_period, false)
     @yesterday_metric_count = validate_metrics_and_count(yesterday_info)
     value = if @yesterday_metric_count > 0
               series = read_series_from_metrics(yesterday_info)
@@ -199,7 +194,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def today_triangulated_metrics
-    today_triangulated_info = metrics(config[:triangulate], today_start_period, today_end_period, true)
+    today_triangulated_info = metrics(config[:triangulate], TODAY_START_PERIOD, today_end_period, true)
     @today_triangulated_metric_count = validate_metrics_and_count(today_triangulated_info)
     value = if @today_triangulated_metric_count > 0
               series = read_series_from_metrics(today_triangulated_info)
@@ -210,7 +205,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def yesterday_triangulated_metrics
-    yesterday_triangulated_info = metrics(config[:triangulate], yesterday_start_period, yesterday_end_period, true)
+    yesterday_triangulated_info = metrics(config[:triangulate], YESTERDAY_START_PERIOD, yesterday_end_period, true)
     @yesterday_triangulated_metric_count = validate_metrics_and_count(yesterday_triangulated_info)
     value = if @yesterday_triangulated_metric_count > 0
               series = read_series_from_metrics(yesterday_triangulated_info)
@@ -313,13 +308,21 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def evaluate_percentage_and_notify(difference)
-    puts 'Difference of: ' + difference.round(4).to_s + ' %  for a period of ' + config[:period].to_s + 'm'
+    puts 'Difference of: ' + difference.round(3).to_s + ' %  for a period of ' + config[:period].to_s + 'm'
     if difference < config[:crit]
       critical "\"#{config[:metric]}\" difference is below allowed minimum of #{config[:crit]} %"
     elsif difference < config[:warn]
       warning "\"#{config[:metric]}\" difference is below warn threshold of #{config[:warn]}"
     else
       ok 'metrics count ok'
+    end
+  end
+
+  def evaluate_distance_and_notify(distance)
+    if distance > config[:distance].to_f
+      critical config[:metric] + ' vs ' + config[:triangulate] + ' distance is greater than allowed minimum of ' + config[:distance]
+    else
+      ok 'distance ok'
     end
   end
 
@@ -332,23 +335,39 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def difference_between_percentages_of_two_metrics
-    puts 'USING TRIANGULATION'
-    difference_for_base_metric = difference_between_two_metrics(today_metrics, yesterday_metrics)
-    puts 'difference for base:'
-    puts difference_for_base_metric
-    difference_for_triangulated_metric = difference_between_two_metrics(today_triangulated_metrics, yesterday_triangulated_metrics)
-    puts 'difference for triangulated:'
-    puts difference_for_triangulated_metric
-    diff = distance_between_two_numbers(difference_for_base_metric, difference_for_triangulated_metric)
-    puts 'distance between numbers:'
-    puts diff
-  end
-
-  def increase(new_number, original_number)
+    validate_base_metrics
+    validate_triangulated_metrics
+    base = difference_between_two_metrics(today_metrics, yesterday_metrics)
+    triangulated = difference_between_two_metrics(today_triangulated_metrics, yesterday_triangulated_metrics)
+    puts 'difference for ' + config[:metric] + ' ' + base.round(3).to_s + '% vs ' + config[:triangulate] + ' ' + triangulated.round(3).to_s + '%'
+    distance = distance_between_two_numbers(base, triangulated)
+    evaluate_distance_and_notify(distance)
   end
 
   def distance_between_two_numbers(a, b)
     (a - b).abs
+  end
+
+  def validate_triangulated_metrics
+    today = today_triangulated_metrics
+    yesterday = yesterday_triangulated_metrics
+    if today.nil? && yesterday.nil?
+      puts 'No metrics found to triangulate'
+      exit
+    else
+      0
+    end
+  end
+
+  def validate_base_metrics
+    today = today_metrics
+    yesterday = yesterday_metrics
+    if today.nil? && yesterday.nil?
+      puts 'No metrics found in base to triangulate'
+      exit
+    else
+      0
+    end
   end
 
   def difference_between_metrics
