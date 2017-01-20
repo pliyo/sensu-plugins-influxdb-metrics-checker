@@ -75,17 +75,17 @@ We may have a metric B (ex: sessions.generated), that has a business dependency 
 
 If we could say that every 5 As relates to 1 B, then the % of difference for A (X in the picture) and the percentage of difference for B (Y in the picture) will always be the same
 ```
-Ex: A' = 15500, A = 20500, X = 32.26%. B' = 3100, B = 4100, Y =  32.26%
+Ex: A' = 15500, A = 20500, X = 32.26%. B' = 3100, B = 4100, Y =  32.26%. So ideally C (distance) = 1.92
 ```
 Realistically, it's not always like that in production applications, sometimes you may need 7 messages, others only 4, so your average would be something around 5.333. Therefore, we can't say that the % in difference will always be the same, but once we look at the *distance* between these percentages (C in the picture), we'll see that they are pretty close. And that's the spirit of it, the ability to diagnose when the distance is higher than expected.
 
 A more real example will be:
 
 ```
-A' = 15500, A = 20500, X = 32.26%. B' = 3081, B = 4134, Y =  34.18%. So C (distance) = 1.92
+A' = 15500, A = 20500, X = 32.26%. B' = 3081, B = 4134, Y =  34.18%. So realistically C (distance) = 1.92
 ```
 
-Let's say that the system that sends items has an increase of 150%, and you are using this tool to verify that, therefore you don't get any exceptions because there is no drop in the metrics, but the system that process sessions keeps in the same 2% increase, which is a big distance up to 148. We clearly have a problem here. Maybe some bottleneck is happening somewhere, maybe some messages are lost due to this huge increase, and hopefully this feature will allow you to identify that something fussy is going on.
+Let's say that the system that sends items has an increase of 150%, and you are using this tool to verify that, therefore you don't get any exceptions because there is no drop in the metrics, but the system that process sessions keeps in the same 2% increase, which is a big distance of 148 up to 150. We clearly have a problem here. Maybe some bottleneck is happening somewhere, maybe some messages are lost due to this huge increase, and hopefully this feature will allow you to identify that something fussy is going on.
 
 **How it works**
 
