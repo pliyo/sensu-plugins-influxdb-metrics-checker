@@ -66,7 +66,7 @@ ruby check-influxdb-metrics.rb --host=metrics-influxdb.internal.com --port=8086 
 
 **Triangulation**
 
-In trigonometry and geometry, triangulation is the process of determining the location of a point by forming triangles to it from known points. This feature of the script is inspired in that idea.
+In trigonometry and geometry, [![triangulation](https://en.wikipedia.org/wiki/Triangulation)]triangulation is the process of determining the location of a point by forming triangles to it from known points. This feature of the script is inspired in that idea.
 
 
 [![triangulation_01.png](https://s24.postimg.org/kjihvilvp/triangulation_01.png (2KB))](https://postimg.org/image/hcnybw1fl/)
