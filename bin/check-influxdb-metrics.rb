@@ -201,7 +201,6 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
               @today_triangulated_metrics = store_metrics(series)
               read_value_from_series(series)
             end
-    puts value
     value
   end
 
