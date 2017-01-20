@@ -82,7 +82,7 @@ Realistically, it's not always like that in production applications, sometimes y
 A more real example will be:
 
 ```
-A' = 15500, A = 20500, X = 32.26%. B' = 3081, B = 4134, Y =  34.18%. So realistically C (distance) = 1.92
+A' = 15500, A = 20500, X = 32.26%. B' = 3081, B = 4134, Y =  34.18%. Therefore C (distance) = 1.92
 ```
 
 Let's say that the system that sends items has an increase of 150%, and you are using this tool to verify that, therefore you don't get any exceptions because there is no drop in the metrics, but the system that process sessions keeps in the same 2% increase, which is a big distance of 148 up to 150. We clearly have a problem here. Maybe some bottleneck is happening somewhere, maybe some messages are lost due to this huge increase, and hopefully this feature will allow you to identify that something fussy is going on.
