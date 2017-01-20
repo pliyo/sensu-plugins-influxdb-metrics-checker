@@ -96,7 +96,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   option :distance,
          long: '--distance=VALUE',
          description: 'Set the distance threshold to alert in case of triangulation',
-         default: 10
+         default: 2
 
   BASE_QUERY = 'SELECT sum("value") from '.freeze
   TODAY_START_PERIOD = 10
@@ -270,7 +270,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     elsif @today_metric_count == @yesterday_metric_count
       compare_each_metric_in_regex
     else
-      ok 'regex seems ok! Less metrics found yesterday (' + @yesterday_metric_count.to_s + ') vs (' + @today_metric_count.to_s + ') found today.'
+      ok 'regex seems ok! Today metrics dropped. Yesterday (' + @yesterday_metric_count.to_s + ') vs (' + @today_metric_count.to_s + ') found today.'
     end
   end
 
