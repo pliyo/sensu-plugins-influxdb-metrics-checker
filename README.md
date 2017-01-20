@@ -66,15 +66,23 @@ ruby check-influxdb-metrics.rb --host=metrics-influxdb.internal.com --port=8086 
 
 **Triangulation**
 
-In trigonometry and geometry, [![triangulation](https://en.wikipedia.org/wiki/Triangulation)]triangulation is the process of determining the location of a point by forming triangles to it from known points. This feature of the script is inspired in that idea.
+In trigonometry and geometry, [![triangulation](https://en.wikipedia.org/wiki/Triangulation)]triangulation is the process of determining the location of a point by forming triangles to it from known points. That's the inspiration behind this feature.
 
 
 [![triangulation_01.png](https://s24.postimg.org/kjihvilvp/triangulation_01.png (2KB))](https://postimg.org/image/hcnybw1fl/)
 
-Once we have a given metric A (ex: messages.sent), we'll normally compare that to yesterday's weather A', we'll get the percentage of difference and according to our threshold we'll fire an alert. Cool. Now let's go one step further.
-We may have a metric B (ex: sessions.generated), that has a business dependency on B. And if we dig further in our metrics, we may even relate that to, let's say, an average of 5 metrics A for each metric B. (In this example, you'll need 5 messages sent to build a session).
+Once we have a given metric A (ex: messages.sent), we'll normally compare that to yesterday's weather A', we'll get the percentage of difference (X in the picture) and according to our threshold we'll fire an alert. Cool. Now let's go one step further.
+We may have a metric B (ex: sessions.generated), that has a business dependency on A. And if we dig further in our metrics, we may discover that, let's say, for every 5 metrics in A we have 1 in B. (In this example, let's say that you'll need 5 messages sent to build 1 session).
 
-If we could say that every 5 As relates to 1 B, then the % of difference for A and B will always be the same. Realistically, it's not always like that in production applications, sometimes you may need 7 messages, others only 4, so your average would be something around 5.333. Therefore, we can't say that the % in difference will always be the same, but once we look at the *distance* between these percentages, we'll see that they are pretty close. And that's the spirit of this feature, the ability to diagnose when the distance is higher than expected.
+If we could say that every 5 As relates to 1 B, then the % of difference for A (X in the picture) and the percentage of difference for B (Y in the picture) will always be the same
+```
+Ex: A' = 15500, A = 20500, X = 32.26%. B' = 3100, B = 4100, Y =  32.26%
+```
+Realistically, it's not always like that in production applications, sometimes you may need 7 messages, others only 4, so your average would be something around 5.333. Therefore, we can't say that the % in difference will always be the same, but once we look at the *distance* between these percentages (C in the picture), we'll see that they are pretty close. And that's the spirit of it, the ability to diagnose when the distance is higher than expected.
+
+```
+A more real example will be: A' = 15500, A = 20500, X = 32.26%. B' = 3081, B = 4134, Y =  34.18%. So C (distance) = 1.92
+```
 
 Let's say that the system that sends items has an increase of 150%, and you are using this tool to verify that, therefore you don't get any exceptions because there is no drop in the metrics, but the system that process sessions keeps in the same 2% increase, which is a big distance up to 148. We clearly have a problem here. Maybe some bottleneck is happening somewhere, maybe some messages are lost due to this huge increase, and hopefully this feature will allow you to identify that something fussy is going on.
 
