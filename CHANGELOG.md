@@ -3,6 +3,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 This CHANGELOG follows the format listed at [Keep A Changelog](http://keepachangelog.com/)
 
+# [0.4.0] - 2017-01-20
+- seventh release
+New feature: Triangulation. Added the ability to get percentage of metric A, get percentage of metric B, and compare the distance between them. Useful when the metrics are related together by some business rule.
+Improved feedback when returning to customer.
+
 # [0.3.4] - 2017-01-17
 - sixth release
 Allow the usage of regex expressions that we can identify as "/^[your_regex]$". I'll strongly recommend to use this only for exceptions, and always aim for zero-exceptions, or it wouldn't be accurate. At the moment it will fire when the number of exception today is bigger than the number of exceptions yesterday.
