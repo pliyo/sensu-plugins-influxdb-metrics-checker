@@ -11,7 +11,7 @@ We chose to do it as a Sensu plugin because it comes with Handlers that will all
 The result is that now we are able to experiment with our metrics and alerts, giving us a better understanding of whats going on in our systems.
 
 ## What it does
-The script will compare the values of yesterday at this time minus 10 minutes, with the values of today at this time minus 10 minus.
+The script will compare the values of yesterday at this time minus 25 minutes, with the values of today at this time minus 25 minus.
 It will calculate the percentage of difference and will act on that.
 You will be able to set a threshold of warning and critical values where your program will act.
 It will also leave it 5 minutes to aggregate the data in influxdb, so we are more precise.
@@ -68,8 +68,9 @@ ruby check-influxdb-metrics.rb --host=metrics-influxdb.internal.com --port=8086 
 **Triangulation**
 
 In trigonometry and geometry, triangulation is the process of determining the location of a point by forming triangles to it from known points. This feature of the script is inspired in that idea.
-[![triangulation_01.png](https://s24.postimg.org/kjihvilvp/triangulation_01.png (2KB)
-)](https://postimg.org/image/hcnybw1fl/)
+
+
+[![triangulation_01.png](https://s24.postimg.org/kjihvilvp/triangulation_01.png (2KB))](https://postimg.org/image/hcnybw1fl/)
 
 Once we have a given metric A (ex: messages.sent), we'll normally compare that to yesterday's weather A', we'll get the percentage of difference and according to our threshold we'll fire an alert. Cool. Now let's go one step further.
 We may have a metric B (ex: sessions.generated), that has a business dependency on B. And if we dig further in our metrics, we may even relate that to, let's say, an average of 5 metrics A for each metric B. (In this example, you'll need 5 messages sent to build a session).
