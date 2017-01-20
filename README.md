@@ -14,7 +14,7 @@ The result is that now we are able to experiment with our metrics and alerts, gi
 The script will compare the values of yesterday at this time minus 25 minutes, with the values of today at this time minus 25 minus.
 It will calculate the percentage of difference and will act on that.
 You will be able to set a threshold of warning and critical values where your program will act.
-It will also leave it 5 minutes to aggregate the data in influxdb, so we are more precise.
+It will also leave it 10 minutes to aggregate the data in influxdb, so we are more precise.
 
 ## Components
 There is just one script that you can find at
@@ -22,8 +22,7 @@ There is just one script that you can find at
 
 ## Getting started
 
-At the moment there is just one script
-**check-influxdb-metrics** which you can run in a bash doing:
+Once we go to **check-influxdb-metrics** you can run it in a bash doing:
 
 ```
 ruby check-influxdb-metrics.rb --host=metrics-influxdb.internal.com --port=8086 --user=admin --password=password -c -3 -w -10 --db=statsd_metrics --metric=api.request.counter
@@ -110,7 +109,9 @@ What matters for this program is that:
 - 24h good
 
 - session.certified will turn into a bad request
-- "session.certified" is good. Notice that when you use grafana or influx db console you don't need the quotes, but when you query through the script you'll need them. When using regex both with and without quotes will work, because what matters is `/^[metric]$/`
+- "session.certified" is good. Notice that when you use grafana or influx db console you don't need the quotes
+ but when you query through the script you'll need them.
+ When using regex both with and without quotes will work, because what matters is `/^[metric]$/`
 ```
 
 **When passing parameters**
