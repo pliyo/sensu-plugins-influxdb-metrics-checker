@@ -201,6 +201,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
               @today_triangulated_metrics = store_metrics(series)
               read_value_from_series(series)
             end
+    puts value
     value
   end
 
@@ -209,7 +210,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     @yesterday_triangulated_metric_count = validate_metrics_and_count(yesterday_triangulated_info)
     value = if @yesterday_triangulated_metric_count > 0
               series = read_series_from_metrics(yesterday_triangulated_info)
-              @today_triangulated_metrics = store_metrics(series)
+              @yesterday_triangulated_metrics = store_metrics(series)
               read_value_from_series(series)
             end
     value
