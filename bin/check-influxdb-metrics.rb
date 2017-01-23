@@ -266,7 +266,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
       ok 'no metrics found'
     elsif @today_metric_count > @yesterday_metric_count
       display_metrics
-      critical 'For ' + config[:metric] + ' more metrics tracked today (' + @today_metric_count + ') than yesterday (' + @yesterday_metric_count + ') See above'
+      critical 'For ' + config[:metric] + ' more metrics tracked today (' + @today_metric_count.to_s + ') than yesterday (' + @yesterday_metric_count.to_s + ')'
     elsif @today_metric_count == @yesterday_metric_count
       compare_each_metric_in_regex
     else
@@ -279,13 +279,25 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     evaluate_percentage_and_notify(difference)
   end
 
+  def difference_for_regex_queries(today, yesterday)
+    difference = difference_between_two_metrics(today, yesterday)
+    evaluate_percentage_for_regex(difference)
+  end
+
   def compare_each_metric_in_regex
     @today_metrics.each do |today_key, today_value|
       @yesterday_metrics.each do |yesterday_key, yesterday_value|
-        if today_key.eql? yesterday_key
-          puts yesterday_value.to_s + ' vs ' + today_value.to_s + ' for ' + today_key
-          difference_for_standard_queries(today_value, yesterday_value)
-        end
+        iterate_through_each_value_in_regex(today_key, today_value, yesterday_key, yesterday_value)
+      end
+    end
+    ok 'all regex metrics seems fine'
+  end
+
+  def iterate_through_each_value_in_regex(today_key, today_value, yesterday_key, yesterday_value)
+    if today_key.eql? yesterday_key
+      puts yesterday_value.to_s + ' vs ' + today_value.to_s + ' for ' + today_key
+      if today_value > yesterday_value
+        difference_for_regex_queries(today_value, yesterday_value)
       end
     end
   end
@@ -307,6 +319,17 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     )
   end
 
+  def evaluate_percentage_for_regex(difference)
+    puts 'Difference of: ' + difference.round(3).to_s + ' %  for a period of ' + config[:period].to_s + 'm'
+    if difference > config[:crit]
+      critical "\"#{config[:metric]}\" difference is above allowed minimum of #{config[:crit]} %"
+    elsif difference > config[:warn]
+      warning "\"#{config[:metric]}\" difference is above warn threshold of #{config[:warn]}"
+    else
+      puts 'this metric seems ok'
+    end
+  end
+
   def evaluate_percentage_and_notify(difference)
     puts 'Difference of: ' + difference.round(3).to_s + ' %  for a period of ' + config[:period].to_s + 'm'
     if difference < config[:crit]
@@ -320,7 +343,8 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def evaluate_distance_and_notify(distance)
     if distance > config[:distance].to_f
-      critical config[:metric] + ' vs ' + config[:triangulate] + ' distance is greater than allowed minimum of ' + config[:distance]
+      puts 'distance of ' + distance.to_s
+      critical config[:metric] + ' vs ' + config[:triangulate] + ' distance is greater than allowed minimum of ' + config[:distance].to_s
     else
       ok 'distance ok'
     end
