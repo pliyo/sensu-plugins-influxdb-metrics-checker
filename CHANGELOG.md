@@ -3,6 +3,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 This CHANGELOG follows the format listed at [Keep A Changelog](http://keepachangelog.com/)
 
+# [0.4.2] - 2017-01-20
+- eight release
+Small fix when printing numbers
+
+
 # [0.4.0] - 2017-01-20
 - seventh release
 New feature: Triangulation. Added the ability to get percentage of metric A, get percentage of metric B, and compare the distance between them. Useful when the metrics are related together by some business rule.
