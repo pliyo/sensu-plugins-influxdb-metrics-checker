@@ -156,6 +156,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   def metrics(metric, start_period, end_period, istriangulated)
     query = query_encoded_for_a_period(metric, start_period, end_period, istriangulated)
     response = request(query)
+    puts response
     parse_json(response)
   end
 
@@ -222,9 +223,12 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def validate_metrics_and_count(metrics)
-    value = metrics[0]['series'][0]['values'][0][1] || 0
-    if metrics.empty? || metrics.nil? || metrics[0].nil? || metrics[0]['series'].nil? || value == 0
-      0
+    if metrics.empty? || metrics.nil? || metrics[0].nil? || metrics[0]['series'].nil?
+      if metrics[0]['series'].nil?
+        0
+      else
+        metrics[0]['series'][0]['values'][0][1] || 0
+      end
     else
       metrics[0]['series'].count
     end
