@@ -155,7 +155,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def metrics(metric, start_period, end_period, istriangulated)
     query = query_encoded_for_a_period(metric, start_period, end_period, istriangulated)
-    response = request(query)
+    response = request(query) # puts response if debugging and what to know whats going on
     parse_json(response)
   end
 
@@ -174,23 +174,25 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   def today_metrics
     today_info = metrics(config[:metric], TODAY_START_PERIOD, today_end_period, false)
     @today_metric_count = validate_metrics_and_count(today_info)
-    value = if @today_metric_count > 0
-              series = read_series_from_metrics(today_info)
-              @today_metrics = store_metrics(series)
-              read_value_from_series(series)
-            end
-    value
+    if @today_metric_count > 0
+      series = read_series_from_metrics(today_info)
+      @today_metrics = store_metrics(series)
+      read_value_from_series(series)
+    else
+      0
+    end
   end
 
   def yesterday_metrics
     yesterday_info = metrics(config[:metric], YESTERDAY_START_PERIOD, yesterday_end_period, false)
     @yesterday_metric_count = validate_metrics_and_count(yesterday_info)
-    value = if @yesterday_metric_count > 0
-              series = read_series_from_metrics(yesterday_info)
-              @yesterday_metrics = store_metrics(series)
-              read_value_from_series(series)
-            end
-    value
+    if @yesterday_metric_count > 0
+      series = read_series_from_metrics(yesterday_info)
+      @yesterday_metrics = store_metrics(series)
+      read_value_from_series(series)
+    else
+      0
+    end
   end
 
   def today_triangulated_metrics
@@ -220,8 +222,12 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def validate_metrics_and_count(metrics)
-    if metrics.empty? || metrics.nil? || metrics[0].nil? || metrics[0]['series'].nil? || metrics[0]['series'][0]['values'][0][1].nil?
-      0
+    if metrics.empty? || metrics.nil? || metrics[0].nil? || metrics[0]['series'].nil?
+      if metrics[0]['series'].nil?
+        0
+      else
+        metrics[0]['series'][0]['values'][0][1] || 0
+      end
     else
       metrics[0]['series'].count
     end
