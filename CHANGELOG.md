@@ -3,10 +3,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 This CHANGELOG follows the format listed at [Keep A Changelog](http://keepachangelog.com/)
 
-# [0.4.2] - 2017-01-20
+# [0.4.8] - 2017-01-24
+- ninth release
+Bug fix when values comes as null. Now they will become zero.
+
+# [0.4.4] - 2017-01-20
 - eight release
 Small fix when printing numbers
-
 
 # [0.4.0] - 2017-01-20
 - seventh release
@@ -52,5 +55,6 @@ Leaving 5 minutes to the data to consolidate.
 [0.3.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.3.0...0.3.2
 [0.3.2]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.3.2...0.3.4
 [0.3.4]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.3.4...0.4.0
-[0.4.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.4.0...0.4.2
-[0.4.2]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.4.2...HEAD
+[0.4.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.4.0...0.4.4
+[0.4.4]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.4.4...0.4.8
+[0.4.8]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.4.8...HEAD
