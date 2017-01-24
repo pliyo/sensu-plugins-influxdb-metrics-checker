@@ -156,7 +156,6 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   def metrics(metric, start_period, end_period, istriangulated)
     query = query_encoded_for_a_period(metric, start_period, end_period, istriangulated)
     response = request(query)
-    puts response
     parse_json(response)
   end
 
