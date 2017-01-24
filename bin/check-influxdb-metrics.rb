@@ -198,23 +198,25 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   def today_triangulated_metrics
     today_triangulated_info = metrics(config[:triangulate], TODAY_START_PERIOD, today_end_period, true)
     @today_triangulated_metric_count = validate_metrics_and_count(today_triangulated_info)
-    value = if @today_triangulated_metric_count > 0
-              series = read_series_from_metrics(today_triangulated_info)
-              @today_triangulated_metrics = store_metrics(series)
-              read_value_from_series(series)
-            end
-    value
+    if @today_triangulated_metric_count > 0
+      series = read_series_from_metrics(today_triangulated_info)
+      @today_triangulated_metrics = store_metrics(series)
+      read_value_from_series(series)
+    else
+      0
+    end
   end
 
   def yesterday_triangulated_metrics
     yesterday_triangulated_info = metrics(config[:triangulate], YESTERDAY_START_PERIOD, yesterday_end_period, true)
     @yesterday_triangulated_metric_count = validate_metrics_and_count(yesterday_triangulated_info)
-    value = if @yesterday_triangulated_metric_count > 0
-              series = read_series_from_metrics(yesterday_triangulated_info)
-              @yesterday_triangulated_metrics = store_metrics(series)
-              read_value_from_series(series)
-            end
-    value
+    if @yesterday_triangulated_metric_count > 0
+      series = read_series_from_metrics(yesterday_triangulated_info)
+      @yesterday_triangulated_metrics = store_metrics(series)
+      read_value_from_series(series)
+    else
+      0
+    end
   end
 
   def read_series_from_metrics(metrics)
