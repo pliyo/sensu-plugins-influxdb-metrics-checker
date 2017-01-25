@@ -83,7 +83,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          long: '--period=VALUE',
          description: 'Filter by a given day period in minutes',
          proc: proc { |l| l.to_i },
-         default: 25
+         default: 30
 
   option :triangulate,
          long: '--triangulate=VALUE',
@@ -99,8 +99,8 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          default: 2
 
   BASE_QUERY = 'SELECT sum("value") from '.freeze
-  TODAY_START_PERIOD = 10
-  YESTERDAY_START_PERIOD = 1455 # starts counting 1455 minutes before now() [ yesetrday - 10 minutes] to match with today_query_for_a_period start_period
+  TODAY_START_PERIOD = 20
+  YESTERDAY_START_PERIOD = 1465 # starts counting 1455 minutes before now() [ yesetrday - 20 minutes] to match with today_query_for_a_period start_period
 
   def yesterday_end_period
     config[:period] + YESTERDAY_START_PERIOD
@@ -283,12 +283,12 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def difference_for_standard_queries(today, yesterday)
-    difference = difference_between_two_metrics(today, yesterday)
+    difference = difference_between_two_metrics(yesterday, today)
     evaluate_percentage_and_notify(difference)
   end
 
   def difference_for_regex_queries(today, yesterday)
-    difference = difference_between_two_metrics(today, yesterday)
+    difference = difference_between_two_metrics(yesterday, today)
     evaluate_percentage_for_regex(difference)
   end
 
@@ -307,12 +307,22 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
       if today_value > yesterday_value
         difference_for_regex_queries(today_value, yesterday_value)
       end
+    else
+      warn 'new metric found: ' + today_key
     end
   end
 
-  def difference_between_two_metrics(original, newnumber)
+  # percentage difference calculator (deprecated)
+  def previous_difference_between_two_metrics(original, newnumber)
     decrease = original - newnumber
     decrease.to_f / original.to_f * 100
+  end
+
+  # percentage of change
+  def difference_between_two_metrics(yesterday, today)
+    decrease = today.to_f - yesterday.to_f
+    division = decrease.to_f / yesterday.to_f.abs
+    division.to_f * 100.to_f
   end
 
   def request(path)
@@ -351,7 +361,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def evaluate_distance_and_notify(distance)
     if distance > config[:distance].to_f
-      puts 'distance of ' + distance.to_s
+      puts 'distance of ' + distance.round(3).to_s
       critical config[:metric] + ' vs ' + config[:triangulate] + ' distance is greater than allowed minimum of ' + config[:distance].to_s
     else
       ok 'distance ok'
@@ -362,15 +372,15 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     if @is_using_regex
       difference_for_regex_and_notify
     else
-      difference_between_two_metrics(today, yesterday)
+      difference_between_two_metrics(yesterday, today)
     end
   end
 
   def difference_between_percentages_of_two_metrics
     validate_base_metrics
     validate_triangulated_metrics
-    base = difference_between_two_metrics(today_metrics, yesterday_metrics)
-    triangulated = difference_between_two_metrics(today_triangulated_metrics, yesterday_triangulated_metrics)
+    base = difference_between_two_metrics(yesterday_metrics, today_metrics)
+    triangulated = difference_between_two_metrics(yesterday_triangulated_metrics, today_triangulated_metrics)
     puts 'difference for ' + config[:metric] + ' ' + base.round(3).to_s + '% vs ' + config[:triangulate] + ' ' + triangulated.round(3).to_s + '%'
     distance = distance_between_two_numbers(base, triangulated)
     evaluate_distance_and_notify(distance)
