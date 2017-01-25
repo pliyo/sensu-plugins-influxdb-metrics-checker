@@ -3,6 +3,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 This CHANGELOG follows the format listed at [Keep A Changelog](http://keepachangelog.com/)
 
+# [0.5.0] - 2017-01-24
+- tenth release
+Changing from Percentage of Difference to Percentage of Change.
+
 # [0.4.8] - 2017-01-24
 - ninth release
 Bug fix when values comes as null. Now they will become zero.
