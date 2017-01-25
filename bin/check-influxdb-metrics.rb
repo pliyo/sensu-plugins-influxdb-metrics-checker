@@ -100,7 +100,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   BASE_QUERY = 'SELECT sum("value") from '.freeze
   TODAY_START_PERIOD = 20
-  YESTERDAY_START_PERIOD = 1465 # starts counting 1455 minutes before now() [ yesetrday - 30 minutes] to match with today_query_for_a_period start_period
+  YESTERDAY_START_PERIOD = 1465 # starts counting 1455 minutes before now() [ yesetrday - 20 minutes] to match with today_query_for_a_period start_period
 
   def yesterday_end_period
     config[:period] + YESTERDAY_START_PERIOD
@@ -320,8 +320,6 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   # percentage of change
   def difference_between_two_metrics(yesterday, today)
-    puts 'yesterday: ' + yesterday.to_s
-    puts 'today: ' + today.to_s
     decrease = today.to_f - yesterday.to_f
     division = decrease.to_f / yesterday.to_f.abs
     division.to_f * 100.to_f
