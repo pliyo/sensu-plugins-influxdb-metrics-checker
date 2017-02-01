@@ -9,7 +9,7 @@ require 'uri'
 require 'json'
 require 'base64'
 require 'addressable/uri'
-require 'date'
+require './time-management'
 
 class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   option :host,
@@ -100,29 +100,24 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          default: 2
 
   BASE_QUERY = 'SELECT sum("value") from '.freeze
-  TODAY_START_PERIOD = 5
-  YESTERDAY_START_PERIOD = 1445 # starts counting 1445 minutes before now() [ yesterday - 5 minutes] to match with today_query_for_a_period start_period
+  TIME_MANAGER = TimeManagement.new
 
   def today_start_period
-    now = Time.now - TODAY_START_PERIOD * 60
-    epoch_time(now)
+    TIME_MANAGER.period_epoch(Time.now, TIME_MANAGER.today_start_period)
   end
 
   def yesterday_start_period
-    now = Time.now - YESTERDAY_START_PERIOD * 60
-    epoch_time(now)
+    TIME_MANAGER.period_epoch(Time.now, TIME_MANAGER.yesterday_start_period)
   end
 
   def yesterday_end_period
-    decrease = config[:period] + YESTERDAY_START_PERIOD
-    now = Time.now - decrease * 60
-    epoch_time(now)
+    decrease = config[:period] + TIME_MANAGER.yesterday_start_period
+    TIME_MANAGER.period_epoch(Time.now, decrease)
   end
 
   def today_end_period
-    decrease = config[:period] + TODAY_START_PERIOD
-    now = Time.now - decrease * 60
-    epoch_time(now)
+    decrease = config[:period] + TIME_MANAGER.today_start_period
+    TIME_MANAGER.period_epoch(Time.now, decrease)
   end
 
   def epoch_time(time)
@@ -169,6 +164,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def query_encoded_for_a_period(metric, start_period, end_period, istriangulated)
     query = query_for_a_period_timespan(metric, start_period, end_period, istriangulated)
+    puts query
     encode_parameters(query)
   end
 
