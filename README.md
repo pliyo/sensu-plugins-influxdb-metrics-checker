@@ -4,15 +4,13 @@
 [![Gem Version](https://badge.fury.io/rb/sensu-plugins-influxdb-metrics-checker.svg)](https://rubygems.org/gems/sensu-plugins-influxdb-metrics-checker)
 
 ## Background story
-As soon as we started using InfluxDB we were wondering how we could read a given metric, compare it to its previous days, evaluate the percentage of difference, and act according to it.
-
-We chose to do it as a Sensu plugin because it comes with Handlers that will allow us to extend the usability of this information, such as sending a message to slack, or sending an alert to OpsGenie.
+ADRIAN IS GUH
 
 The result is that now we are able to experiment with our metrics and alerts, giving us a better understanding of whats going on in our systems.
 
 ## What it does
 The script will compare the values of yesterday at this time minus period, with the values of today at this time minus period.
-Being period a default value of 20 minutes. 
+Being period a default value of 20 minutes.
 It will calculate the percentage of difference and will act on that.
 You will be able to set a threshold of warning and critical values where your program will act.
 It will also leave it 5 minutes to aggregate the data in influxdb, so we are more precise.
