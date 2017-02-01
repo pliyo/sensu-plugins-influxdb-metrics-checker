@@ -9,6 +9,7 @@ require 'uri'
 require 'json'
 require 'base64'
 require 'addressable/uri'
+require './time-management'
 
 class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   option :host,
@@ -83,7 +84,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          long: '--period=VALUE',
          description: 'Filter by a given day period in minutes',
          proc: proc { |l| l.to_i },
-         default: 30
+         default: 20
 
   option :triangulate,
          long: '--triangulate=VALUE',
@@ -99,15 +100,28 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
          default: 2
 
   BASE_QUERY = 'SELECT sum("value") from '.freeze
-  TODAY_START_PERIOD = 20
-  YESTERDAY_START_PERIOD = 1465 # starts counting 1455 minutes before now() [ yesetrday - 20 minutes] to match with today_query_for_a_period start_period
+  TIME_MANAGER = TimeManagement.new
+
+  def today_start_period
+    TIME_MANAGER.period_epoch(Time.now, TIME_MANAGER.today_start_period)
+  end
+
+  def yesterday_start_period
+    TIME_MANAGER.period_epoch(Time.now, TIME_MANAGER.yesterday_start_period)
+  end
 
   def yesterday_end_period
-    config[:period] + YESTERDAY_START_PERIOD
+    decrease = config[:period] + TIME_MANAGER.yesterday_start_period
+    TIME_MANAGER.period_epoch(Time.now, decrease)
   end
 
   def today_end_period
-    config[:period] + TODAY_START_PERIOD
+    decrease = config[:period] + TIME_MANAGER.today_start_period
+    TIME_MANAGER.period_epoch(Time.now, decrease)
+  end
+
+  def epoch_time(time)
+    time.to_i.to_s
   end
 
   def base_query_with_metricname(metric)
@@ -135,8 +149,8 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
     config[:applyfilterbothqueries].nil? ? '' : " AND \"#{config[:tag]}\" =~ /#{config[:filter]}/"
   end
 
-  def query_for_a_period(metric, start_period, end_period, istriangulated)
-    query = base_query_with_metricname(metric) + ' WHERE time > now() - ' + end_period.to_s + 'm AND time < now() - ' + start_period.to_s + 'm'
+  def query_for_a_period_timespan(metric, start_period, end_period, istriangulated)
+    query = base_query_with_metricname(metric) + ' WHERE time > ' + end_period.to_s + 's AND time < ' + start_period.to_s + 's'
     query + add_filter_when_needed(istriangulated)
   end
 
@@ -149,7 +163,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def query_encoded_for_a_period(metric, start_period, end_period, istriangulated)
-    query = query_for_a_period(metric, start_period, end_period, istriangulated)
+    query = query_for_a_period_timespan(metric, start_period, end_period, istriangulated)
     encode_parameters(query)
   end
 
@@ -172,7 +186,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def today_metrics
-    today_info = metrics(config[:metric], TODAY_START_PERIOD, today_end_period, false)
+    today_info = metrics(config[:metric], today_start_period, today_end_period, false)
     @today_metric_count = validate_metrics_and_count(today_info)
     if @today_metric_count > 0
       series = read_series_from_metrics(today_info)
@@ -184,7 +198,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def yesterday_metrics
-    yesterday_info = metrics(config[:metric], YESTERDAY_START_PERIOD, yesterday_end_period, false)
+    yesterday_info = metrics(config[:metric], yesterday_start_period, yesterday_end_period, false)
     @yesterday_metric_count = validate_metrics_and_count(yesterday_info)
     if @yesterday_metric_count > 0
       series = read_series_from_metrics(yesterday_info)
@@ -196,7 +210,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def today_triangulated_metrics
-    today_triangulated_info = metrics(config[:triangulate], TODAY_START_PERIOD, today_end_period, true)
+    today_triangulated_info = metrics(config[:triangulate], today_start_period, today_end_period, true)
     @today_triangulated_metric_count = validate_metrics_and_count(today_triangulated_info)
     if @today_triangulated_metric_count > 0
       series = read_series_from_metrics(today_triangulated_info)
@@ -208,7 +222,7 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def yesterday_triangulated_metrics
-    yesterday_triangulated_info = metrics(config[:triangulate], YESTERDAY_START_PERIOD, yesterday_end_period, true)
+    yesterday_triangulated_info = metrics(config[:triangulate], yesterday_start_period, yesterday_end_period, true)
     @yesterday_triangulated_metric_count = validate_metrics_and_count(yesterday_triangulated_info)
     if @yesterday_triangulated_metric_count > 0
       series = read_series_from_metrics(yesterday_triangulated_info)

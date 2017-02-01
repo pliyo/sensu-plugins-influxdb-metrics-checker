@@ -35,4 +35,8 @@ task :check_binstubs do
   end
 end
 
-task default: [:spec, :make_bin_executable, :yard, :rubocop, :check_binstubs]
+task default: [:spec, :make_bin_executable, :yard, :rubocop, :check_binstubs, :test]
+
+task :test do
+  ruby 'tests/check-influxdb-metrics-tests.rb'
+end
