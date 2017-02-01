@@ -3,6 +3,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 This CHANGELOG follows the format listed at [Keep A Changelog](http://keepachangelog.com/)
 
+# [0.6.0] - 2017-02-01
+- eleventh release
+Using absolute time in `epoch seconds` instead of relative time `now`
+
 # [0.5.0] - 2017-01-24
 - tenth release
 Changing from Percentage of Difference to Percentage of Change.
@@ -61,4 +65,6 @@ Leaving 5 minutes to the data to consolidate.
 [0.3.4]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.3.4...0.4.0
 [0.4.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.4.0...0.4.4
 [0.4.4]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.4.4...0.4.8
-[0.4.8]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.4.8...HEAD
+[0.4.8]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.4.8...0.5.0
+[0.5.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.5.0...0.6.0
+[0.6.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.6.0...HEAD
