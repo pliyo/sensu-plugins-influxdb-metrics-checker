@@ -11,10 +11,11 @@ We chose to do it as a Sensu plugin because it comes with Handlers that will all
 The result is that now we are able to experiment with our metrics and alerts, giving us a better understanding of whats going on in our systems.
 
 ## What it does
-The script will compare the values of yesterday at this time minus 25 minutes, with the values of today at this time minus 25 minus.
+The script will compare the values of yesterday at this time minus period, with the values of today at this time minus period.
+Being period a default value of 20 minutes. 
 It will calculate the percentage of difference and will act on that.
 You will be able to set a threshold of warning and critical values where your program will act.
-It will also leave it 10 minutes to aggregate the data in influxdb, so we are more precise.
+It will also leave it 5 minutes to aggregate the data in influxdb, so we are more precise.
 
 ## Components
 There is just one script that you can find at
