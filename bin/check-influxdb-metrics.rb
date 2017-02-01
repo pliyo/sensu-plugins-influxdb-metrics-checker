@@ -164,7 +164,6 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
 
   def query_encoded_for_a_period(metric, start_period, end_period, istriangulated)
     query = query_for_a_period_timespan(metric, start_period, end_period, istriangulated)
-    puts query
     encode_parameters(query)
   end
 
