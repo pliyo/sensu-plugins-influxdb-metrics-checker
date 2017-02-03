@@ -3,6 +3,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require 'date'
 require_relative './lib/sensu-plugins-influxdb-metrics-checker'
+require_relative './lib/time-management'
 
 Gem::Specification.new do |s|
   s.authors                = ['Juanjo Guerrero Cerezuela']

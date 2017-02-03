@@ -1,5 +1,5 @@
 require 'test/unit'
-require_relative '../bin/time-management'
+require_relative '../lib/time-management'
 
 class TimePeriodTests < Test::Unit::TestCase
   def test_today_start_period
