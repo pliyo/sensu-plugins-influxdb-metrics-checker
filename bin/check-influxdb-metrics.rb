@@ -9,7 +9,7 @@ require 'uri'
 require 'json'
 require 'base64'
 require 'addressable/uri'
-require './lib/time-management'
+require 'time-management'
 
 class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   option :host,
