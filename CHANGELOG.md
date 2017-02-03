@@ -3,9 +3,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 This CHANGELOG follows the format listed at [Keep A Changelog](http://keepachangelog.com/)
 
+# [0.6.1] - 2017-02-03
+Aiming to fix a problem with 0.6.0 where a library was not included.
+It uses absolute time in epoch seconds instead of relative time (now)
+
 # [0.6.0] - 2017-02-01
 - eleventh release
-Using absolute time in `epoch seconds` instead of relative time `now`
+Using absolute time in `epoch seconds` instead of relative time `now`.
+This version is not working because it's missing a library, please don't use it.
 
 # [0.5.0] - 2017-01-24
 - tenth release
@@ -67,4 +72,5 @@ Leaving 5 minutes to the data to consolidate.
 [0.4.4]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.4.4...0.4.8
 [0.4.8]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.4.8...0.5.0
 [0.5.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.5.0...0.6.0
-[0.6.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.6.0...HEAD
+[0.6.0]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.6.0...0.6.1
+[0.6.1]: https://github.com/pliyosenpai/sensu-plugins-influxdb-metrics-checker/0.6.1...HEAD
