@@ -1,6 +1,6 @@
 # sensu-plugins-influxdb-metrics-checker
 
-[ ![Build Status](https://travis-ci.org/pliyosenpai/sensu-plugins-influxdb-metrics-checker.svg?branch=master)](https://travis-ci.org/pliyosenpai/sensu-plugins-influxdb-metrics-checker)
+[ ![Build Status](https://travis-ci.org/pliyosan/sensu-plugins-influxdb-metrics-checker.svg?branch=master)
 [![Gem Version](https://badge.fury.io/rb/sensu-plugins-influxdb-metrics-checker.svg)](https://rubygems.org/gems/sensu-plugins-influxdb-metrics-checker)
 
 ## Background story
