@@ -142,11 +142,11 @@ class CheckInfluxDbMetrics < Sensu::Plugin::Check::CLI
   end
 
   def filter_by_environment_when_needed
-    config[:tag].nil? && config[:filter].nil? ? '' : " AND \"#{config[:tag]}\" =~ /#{config[:filter]}/"
+    config[:tag].nil? && config[:filter].nil? ? '' : " AND \"#{config[:filter]}\" =~ /#{config[:tag]}/"
   end
 
   def filter_for_triangulate_when_needed
-    config[:applyfilterbothqueries].nil? ? '' : " AND \"#{config[:tag]}\" =~ /#{config[:filter]}/"
+    config[:applyfilterbothqueries].nil? ? '' : " AND \"#{config[:filter]}\" =~ /#{config[:tag]}/"
   end
 
   def query_for_a_period_timespan(metric, start_period, end_period, istriangulated)
